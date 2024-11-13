@@ -1,0 +1,82 @@
+:root {
+    /* Special */
+    --background: #0D0D10;
+    --foreground: #c2c2c3;
+    --cursor: #c2c2c3;
+
+    /* Colors */
+    --color0: #0D0D10;
+    --color1: #494040;
+    --color2: #5C514F;
+    --color3: #9C1B16;
+    --color4: #D2472A;
+    --color5: #996B60;
+    --color6: #D2936C;
+    --color7: #c2c2c3;
+    --color8: #58586b;
+    --color9: #494040;
+    --color10: #5C514F;
+    --color11: #9C1B16;
+    --color12: #D2472A;
+    --color13: #996B60;
+    --color14: #D2936C;
+    --color15: #c2c2c3;
+}
+@font-face {
+    font-family: "customFont";
+    src: url("BitstreamVeraSansMono/BitstromWeraNerdFont-Regular.ttf")
+}
+
+html {
+    font-family: "customFont", sans-serif;
+}
+
+body {
+    background-color: var(--background);
+}
+
+main {
+    background-color: var(--background);
+}
+
+.header {
+    background-color: var(--color15);
+    color: var(--background);
+    width: 100%;
+    height: 5%;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.nav {
+   width: 30%;
+   display: inline;
+   text-align: right;
+   vertical-align: middle;
+   margin:auto 0 auto;
+}
+
+.nav-buttons {
+   display: inline; 
+   margin-right: 15px;
+}
+
+.title {
+    display: inline;
+    margin:auto 6px auto;
+}
+
+h2 {
+    color: var(--foreground);
+    text-align: center;
+    padding-top: 4%;
+    font-size: 3rem;
+}
+
+.introdution {
+    width: 70%;
+    text-align: center;
+    margin: auto;
+    color: var(--foreground);
+}
