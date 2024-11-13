@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "parcel src/index.html",
     "build": "parcel build src/index.html",
-    "deploy": "rm -rf dist/ && gh-pages -d dist"
+    "deploy": "rm -rf dist/ && npm run build && gh-pages -d dist"
   },
   "homepage": "https://GoGoGadgetGitHub.github.io/portfolio",
   "author": "",
@@ -13,10 +13,6 @@
   "description": "",
   "dependencies": {
     "dat.gui": "^0.7.9",
-    "gh-pages": "^6.2.0",
     "three": "^0.170.0"
-  },
-  "devDependencies": {
-    "parcel-bundler": "^1.12.5"
   }
 }
