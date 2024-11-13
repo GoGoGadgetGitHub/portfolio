@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "parcel src/index.html",
-    "build": "parcel build src/index.html",
+    "build": "parcel build src/index.html --public-url ./",
     "deploy": "rm -rf dist/ && npm run build && gh-pages -d dist"
   },
   "homepage": "https://GoGoGadgetGitHub.github.io/portfolio",
