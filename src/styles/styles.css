@@ -1,3 +1,5 @@
+@import "./animations.css";
+
 :root {
     /* Special */
     --background: #0D0D10;
@@ -24,11 +26,11 @@
 }
 @font-face {
     font-family: "customFont";
-    src: url("BitstreamVeraSansMono/BitstromWeraNerdFont-Regular.ttf")
+    src: "../fonts/BitstreamVeraSansMono/BitstromWeraNerdFont-Regular.ttf";
 }
 
 html {
-    font-family: "customFont", sans-serif;
+    font-family: sans-serif;
 }
 
 body {
@@ -97,6 +99,10 @@ h2 {
     margin: 2% auto;
     min-width: 250px;
     position: relative;
+    transition: all .2s ease-in-out;
+}
+.project:hover {
+    transform: scale(1.1);
 }
 
 .image-window {
