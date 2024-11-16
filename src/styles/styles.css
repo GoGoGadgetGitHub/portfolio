@@ -76,11 +76,34 @@ h2 {
     font-size: 3rem;
 }
 
-.introdution {
-    width: 70%;
-    text-align: center;
-    margin: auto;
+.about-me {
+    display: flex;
+    justify-content: center;
+    align-content: space-between;
+    flex-wrap: wrap;
+}
+
+.about-me-headding {
+    background-color: var(--foreground);
+    color: var(--background);
+    width: max-content;
+    border: 4px var(--foreground) solid;
+    border-radius: 8px;
+}
+
+.block-text-container {
+    min-width:400px;
+    width: 30%;
     color: var(--foreground);
+    padding: 0 10%;
+}
+
+a:hover {
+    color: var(--color4);
+}
+
+a {
+    color: var(--color14);
 }
 
 .project-listing {
