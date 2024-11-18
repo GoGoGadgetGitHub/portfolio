@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import saturnRingTexture from '../assets/saturn_ring.png'
 import neptuneRingTexture from '../assets/uranus_ring.png' 
-import { RENDERER, SCENE, CAMERA, SUN_RADIUS, CONTROLS } from "./constants"
+import {SCENE, CAMERA, SUN_RADIUS, CONTROLS } from "./constants"
 
 
 export class Planet{

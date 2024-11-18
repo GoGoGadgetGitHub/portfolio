@@ -11,8 +11,10 @@ export const CAMERA = new THREE.PerspectiveCamera(
     0.1,
     100000
 );
+var canvRefrence = document.getElementById("solarsystem-canvas");
 export const RENDERER = new THREE.WebGLRenderer({
-    antialias: true
+    antialias: true,
+    canvas: canvRefrence
 });
 RENDERER.setSize(window.innerWidth, window.innerHeight);
 

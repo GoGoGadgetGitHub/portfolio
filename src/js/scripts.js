@@ -37,8 +37,6 @@ import titaniaTexture from '../assets/Titania.png';
 import oberonTexture from '../assets/Oberon.png';
 import tritonTexture from '../assets/Triton.png';
 
-document.body.appendChild(RENDERER.domElement);
-
 //Skybox
 const cubeTextureLoader = new THREE.CubeTextureLoader();
 SCENE.background = cubeTextureLoader.load([
