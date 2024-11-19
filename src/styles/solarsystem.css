@@ -2,8 +2,7 @@
 
 
 main {
-  z-index: -1;
-  position: absolute;
+  position: relative;
 }
 
 .controls {
@@ -12,12 +11,12 @@ main {
   justify-content: space-between;
   align-items: center;
   width: 80%;
+  left: 50%;
   background-color: var(--foreground);
+  color: var(--background);
   border-radius: 15px;
-  z-index: 1;
-  margin: 0 auto;
-  right: 0;
-  margin: 1% 1.3% 0 0;
+  z-index: 10;
+  transform: translate(-50%, 0);
 }
 
 .controls .dropdown{
@@ -25,9 +24,6 @@ main {
   width:max-content;
   padding: .3em;
   margin: auto;
-}
-
-.speed-control {
 }
 
 .speed input{
@@ -46,7 +42,7 @@ main {
 }
 
 #solarsystem-canvas {
-  position: relative;
+  position: absolute;
   z-index: 0;
   width: 100%;
   height: 100%;

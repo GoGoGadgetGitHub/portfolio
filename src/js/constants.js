@@ -17,6 +17,7 @@ export const RENDERER = new THREE.WebGLRenderer({
     canvas: canvRefrence
 });
 RENDERER.setSize(window.innerWidth, window.innerHeight);
+RENDERER.setPixelRatio(window.devicePixelRatio);
 
 //Camera Controls
 export const CONTROLS = new OrbitControls(CAMERA, RENDERER.domElement);

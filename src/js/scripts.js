@@ -245,13 +245,14 @@ document.addEventListener('wheel', function(e) {
         const planet = planets[i];
         if (options[i] && planet!="None"){
             if (planet != undefined){
-                planet.updateDistance(delta);}
+                planet.updateDistance(delta * planet.radius * 0.5);}
             else{
                 Object.keys(planets).forEach(function(j, index){
-                    if (planets[j].getMoon(i) != undefined){
-                        planets[j].getMoon(i).cameraDistanceFromMoon += delta * 0.001;
-                        if (planets[j].getMoon(i).cameraDistanceFromMoon < 0.5){
-                            planets[j].getMoon(i).cameraDistanceFromMoon = 0.5;
+                    var moon = planets[j].getMoon(i);
+                    if (moon != undefined){
+                        planets[j].getMoon(i).cameraDistanceFromMoon += delta * moon.radius * 0.5;
+                        if (moon.cameraDistanceFromMoon < 0.5){
+                            moon.cameraDistanceFromMoon = 0.5;
                         }
                     }
                 });
@@ -265,11 +266,12 @@ guiController.addEventListener('wheel', function(e){
     e.stopPropagation();
 });
 
-document.addEventListener('resize', function(){
+window.addEventListener('resize', function(){
     CAMERA.aspect = window.innerWidth / window.innerHeight;
     CAMERA.updateProjectionMatrix();
     RENDERER.setSize(window.innerWidth, window.innerHeight);
-});
+}); 
+
 
 RENDERER.setAnimationLoop(animate);
 
