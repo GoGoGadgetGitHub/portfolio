@@ -103,7 +103,7 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 0.01)
 SCENE.add(ambientLight);
 
 //GUI
-const gui =new dat.GUI();
+//const gui =new dat.GUI();
 
 const options = {
     Mercury: false,
@@ -139,6 +139,26 @@ const options = {
     Speed: 0.1
 };
 
+const dropdown = document.getElementById("dropdown-content");
+var menuEntry;
+var label;
+var checkBox;
+for (var planet in planets){
+    menuEntry = document.createElement("div");
+    dropdown.appendChild(menuEntry);
+    menuEntry.setAttribute("class",`planet-${planet}`);
+    menuEntry.setAttribute("id", "planet-div");
+    label = document.createElement("lable");
+    label.textContent = `${planet}`;
+    checkBox = document.createElement("input");
+    checkBox.setAttribute("type", "checkbox");
+    menuEntry.appendChild(label);
+    menuEntry.appendChild(checkBox);
+
+}
+
+
+/*
 const lockOnPlanets = gui.addFolder("Planets");
 const lockOnEarthMoons = gui.addFolder("Earth Moons");
 const lockOnMarsMoons = gui.addFolder("Mars Moons");
@@ -196,6 +216,7 @@ function setChecked(prop){
     }
     options[prop] =true;
 }
+*/
 
 //Animation
 function animate(){
@@ -261,10 +282,10 @@ document.addEventListener('wheel', function(e) {
     });
 });
 
-const guiController = gui.domElement;
+/*const guiController = gui.domElement;
 guiController.addEventListener('wheel', function(e){
     e.stopPropagation();
-});
+});*/
 
 window.addEventListener('resize', function(){
     CAMERA.aspect = window.innerWidth / window.innerHeight;

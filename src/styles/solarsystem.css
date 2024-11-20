@@ -12,20 +12,51 @@ main {
   align-items: center;
   width: 80%;
   left: 50%;
-  background-color: var(--foreground);
-  color: var(--background);
+  background-color: var(--background);
+  color: var(--foreground);
   border-radius: 15px;
   z-index: 10;
-  transform: translate(-50%, 0);
+  transform: translate(-50%, 20%);
+  border: 3px solid var(--foreground);
+}
+
+#dropdown-content {
+  display: block;
+  position: absolute;
+  border: 5px solid var(--background);
+  border-radius: 15px;
+  background-color: var(--background);
+  width: 20%;
+  top: 105%;
+}
+
+.dropdown-content #planet-div {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.dropdown:hover #dropdown-content {
+  display: block;
 }
 
 .controls .dropdown{
-  display: inline-block;
-  width:max-content;
+  display: flex;
   padding: .3em;
   margin: auto;
+  width: 20%;
 }
 
+.dropdown #arrow {
+  margin: auto 0 auto auto;
+  height: 100%;
+}
+
+.dropdown p{
+  height: 100%;
+  text-align: center;
+  margin: 0;
+}
 .speed input{
   display: inline;
   vertical-align: middle;

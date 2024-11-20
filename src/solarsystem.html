@@ -12,13 +12,15 @@
       <div class="controls">
         <lable class="lock-on-none">Lock on none: <input type="checkbox" id="control-checkbox-none"/></lable>
         <div class="speed"><lable>Speed</lable><input type="range" id="control-range-speed"/></div>
-        <div class="dropdown">Planets</div>
-        <div class="dropdown">Moons</div>
+        <div class="dropdown" id="lockon-dropdown">
+          <p>View</p><img id="arrow" src="./assets/down-arrow.svg" alt="down-arrow"/>
+          <div id="dropdown-content"></div>
+        </div>
       </div>
       <canvas id="solarsystem-canvas">
-        <script src="./js/scripts.js" type="module"></script>
       </canvas>
     </main>
 
+    <script src="./js/scripts.js" type="module"></script>
   </body>
 </html>
