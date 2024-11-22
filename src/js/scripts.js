@@ -36,6 +36,7 @@ import umbrielTexture from '../assets/Umbriel.png';
 import titaniaTexture from '../assets/Titania.png';
 import oberonTexture from '../assets/Oberon.png';
 import tritonTexture from '../assets/Triton.png';
+import downArrow from '../assets/down-arrow.svg';
 
 //Skybox
 const cubeTextureLoader = new THREE.CubeTextureLoader();
@@ -140,23 +141,65 @@ const options = {
 };
 
 const dropdown = document.getElementById("dropdown-content");
+const select = document.getElementById("select-body");
 var menuEntry;
+var subMenu;
+var optGroup;
 var label;
 var checkBox;
-for (var planet in planets){
+var arrow;
+var planetObj;
+        
+Object.keys(planets).forEach(function(planet, index){
+    planetObj = planets[planet];
+
     menuEntry = document.createElement("div");
-    dropdown.appendChild(menuEntry);
-    menuEntry.setAttribute("class",`planet-${planet}`);
-    menuEntry.setAttribute("id", "planet-div");
+    menuEntry.id = "planet-div";
+    menuEntry.classList.add(`${planet}`)
+
     label = document.createElement("lable");
     label.textContent = `${planet}`;
-    checkBox = document.createElement("input");
-    checkBox.setAttribute("type", "checkbox");
-    menuEntry.appendChild(label);
-    menuEntry.appendChild(checkBox);
 
+    dropdown.appendChild(menuEntry);
+    menuEntry.appendChild(label);
+
+    if (planet !== "Mercury" && planet !== "Venus"){
+        arrow = document.createElement("img");
+        arrow.src = downArrow;
+        arrow.classList.add("arrow");
+        arrow.dataset.rotation = "0";
+        arrow.onclick = rotate;
+        menuEntry.append(arrow);
+    }
+
+    subMenu = document.createElement("div");
+    
+    dropdown.appendChild(subMenu);
+
+    Object.keys(planetObj.moons).forEach(function(moon, index){
+        menuEntry = document.createElement("div");
+        menuEntry.id = "moon-div";
+        menuEntry.classList.add(`${planet}-moon`);
+
+        label = document.createElement("label");
+        label.textContent= `${moon}`;
+
+        menuEntry.appendChild(label);
+        subMenu.appendChild(menuEntry);
+    })
+}) 
+
+function rotate(event){
+    const arrow = event.target; 
+    let rotation = parseInt(arrow.dataset.rotation || 0, 10); 
+    rotation += 180;
+    arrow.dataset.rotation = rotation;
+    arrow.style.transform = `rotate(${rotation}deg)`;
 }
 
+function expand(event){
+    
+}
 
 /*
 const lockOnPlanets = gui.addFolder("Planets");

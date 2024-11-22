@@ -1,6 +1,5 @@
 @import './styles.css';
 
-
 main {
   position: relative;
 }
@@ -30,11 +29,16 @@ main {
   top: 105%;
 }
 
-.dropdown-content #planet-div {
+#dropdown-content #planet-div {
   display: flex;
   justify-content: space-between;
 }
 
+#dropdown-content #moon-div label{
+  display: block;
+  margin: auto;
+  width: max-content;
+}
 
 .dropdown:hover #dropdown-content {
   display: block;
@@ -47,9 +51,14 @@ main {
   width: 20%;
 }
 
-.dropdown #arrow {
+.arrow{
   margin: auto 0 auto auto;
-  height: 100%;
+  cursor: pointer; 
+  transition: transform 0.4s ease-in-out;
+}
+
+#dropdown-content #dropdown-checkbox {
+  margin-left: auto;
 }
 
 .dropdown p{
