@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as dat from 'dat.gui';
+const $ = require("jquery");
 import { SCENE,CAMERA,RENDERER,CONTROLS } from "./constants";
 import { Planet,Sun } from "./planet";
 import starsPX from '../assets/px.jpg';
@@ -144,18 +144,23 @@ const dropdown = document.getElementById("dropdown-content");
 const select = document.getElementById("select-body");
 var menuEntry;
 var subMenu;
-var optGroup;
 var label;
-var checkBox;
 var arrow;
 var planetObj;
+
+arrow = document.createElement("img");
+arrow.src = downArrow;
+arrow.classList.add("arrow","main-dropdown");
+arrow.dataset.rotation = "0";
+arrow.onclick = expandMain;
+document.getElementById("view-dropdown").append(arrow);
         
 Object.keys(planets).forEach(function(planet, index){
     planetObj = planets[planet];
 
     menuEntry = document.createElement("div");
     menuEntry.id = "planet-div";
-    menuEntry.classList.add(`${planet}`)
+    menuEntry.classList.add(`${planet}`);
 
     label = document.createElement("lable");
     label.textContent = `${planet}`;
@@ -166,20 +171,21 @@ Object.keys(planets).forEach(function(planet, index){
     if (planet !== "Mercury" && planet !== "Venus"){
         arrow = document.createElement("img");
         arrow.src = downArrow;
-        arrow.classList.add("arrow");
+        arrow.classList.add("arrow", `${planet}`);
         arrow.dataset.rotation = "0";
-        arrow.onclick = rotate;
+        arrow.onclick = expand;
         menuEntry.append(arrow);
     }
 
     subMenu = document.createElement("div");
-    
+    subMenu.id = `moons-${planet}` 
+    subMenu.classList.add("hide", "dropdown-item");
     dropdown.appendChild(subMenu);
 
     Object.keys(planetObj.moons).forEach(function(moon, index){
         menuEntry = document.createElement("div");
         menuEntry.id = "moon-div";
-        menuEntry.classList.add(`${planet}-moon`);
+        menuEntry.classList.add(`${planet}`);
 
         label = document.createElement("label");
         label.textContent= `${moon}`;
@@ -198,7 +204,26 @@ function rotate(event){
 }
 
 function expand(event){
+    rotate(event);
+    const clicked = event.target;
+    const planet = clicked.classList[clicked.classList.length -1];
+    const subMenu = document.getElementById(`moons-${planet}`);
+    if (subMenu.classList.contains("hide")){
+        subMenu.classList.remove("hide");
+    }else{
+        subMenu.classList.add("hide");
+    }
+}
+
+function expandMain(event){
     
+    rotate(event);
+    const dropdown = document.getElementById("dropdown-content");
+    if (dropdown.classList.contains("hide")){
+        dropdown.classList.remove("hide");
+    }else{
+        dropdown.classList.add("hide");
+    }
 }
 
 /*

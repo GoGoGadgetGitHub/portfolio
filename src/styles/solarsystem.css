@@ -4,6 +4,10 @@ main {
   position: relative;
 }
 
+.hide{
+  display: none;
+}
+
 .controls {
   position: absolute;
   display: flex;
@@ -20,13 +24,12 @@ main {
 }
 
 #dropdown-content {
-  display: block;
   position: absolute;
   border: 5px solid var(--background);
   border-radius: 15px;
   background-color: var(--background);
   width: 20%;
-  top: 105%;
+  top: 115%;
 }
 
 #dropdown-content #planet-div {
@@ -40,10 +43,6 @@ main {
   width: max-content;
 }
 
-.dropdown:hover #dropdown-content {
-  display: block;
-}
-
 .controls .dropdown{
   display: flex;
   padding: .3em;
@@ -54,6 +53,7 @@ main {
 .arrow{
   margin: auto 0 auto auto;
   cursor: pointer; 
+  width: 13%;
   transition: transform 0.4s ease-in-out;
 }
 
@@ -76,7 +76,6 @@ main {
   vertical-align: middle;
   margin: auto;
 }
-
 .controls .lock-on-none {
   padding: 0 1em;
 }
