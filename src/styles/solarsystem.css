@@ -8,6 +8,11 @@ main {
   display: none;
 }
 
+.selected{
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
 .controls {
   position: absolute;
   display: flex;
@@ -28,7 +33,7 @@ main {
   border: 5px solid var(--background);
   border-radius: 15px;
   background-color: var(--background);
-  width: 20%;
+  width: 10rem;
   top: 115%;
 }
 
@@ -47,18 +52,24 @@ main {
   display: flex;
   padding: .3em;
   margin: auto;
-  width: 20%;
+  width: 10rem;
 }
-
+#stop-viewing{
+  border: 4px solid var(--foreground);
+  border-radius: 15px;
+  background-color: var(--foreground);
+  color: var(--background);
+}
+#stop-viewing:hover{
+  background-color: var(--color3);
+  color: var(--foreground);
+  border-color: var(--color3);
+}
 .arrow{
   margin: auto 0 auto auto;
   cursor: pointer; 
-  width: 13%;
+  width: 1.2rem;
   transition: transform 0.4s ease-in-out;
-}
-
-#dropdown-content #dropdown-checkbox {
-  margin-left: auto;
 }
 
 .dropdown p{
@@ -66,9 +77,8 @@ main {
   text-align: center;
   margin: 0;
 }
-.speed input{
-  display: inline;
-  vertical-align: middle;
+.dropdown label:hover {
+  color: var(--color3);
 }
 
 .speed lable {
@@ -76,8 +86,42 @@ main {
   vertical-align: middle;
   margin: auto;
 }
-.controls .lock-on-none {
-  padding: 0 1em;
+.speed {
+  margin: auto;
+}
+
+#stop-viewing {
+  margin:auto;
+}
+
+#speed-control {
+  background: var(--foreground);
+  height: .4rem;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  border-radius: 15px;
+  display: inline;
+  vertical-align: middle;
+}
+
+#speed-control::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%; 
+  border: none;
+  background: var(--color3);
+  cursor: pointer;
+}
+
+#speed-control::-moz-range-thumb {
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--color3);
+  cursor: pointer;
 }
 
 #solarsystem-canvas {
