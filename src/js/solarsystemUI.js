@@ -1,6 +1,7 @@
 import downArrow from '../assets/down-arrow.svg';
 import {planets} from './canvas';
 
+// this is used by the animation loop to decide which if any bodies should be locked on to
 export const options = {
     Mercury: false,
     Venus: false,
@@ -41,17 +42,22 @@ var arrow;
 var planetObj;
 var lastSelected;
 
-arrow = document.createElement("img");
-arrow.src = downArrow;
-arrow.classList.add("arrow","main-dropdown");
-arrow.dataset.rotation = "0";
+//Adding arrow to dropdown on controls
+arrow = addArrow(false);
+arrow.id = "main-arrow";
 arrow.onclick = expandMain;
 document.getElementById("view-dropdown").append(arrow);
 
+//Additional onclicks
 document.getElementById("stop-viewing").onclick = removeLockOn;
+document.getElementById("solarsystem-canvas").onclick = hideDropdown;
 
+//Used to initally style slider on page load
 styleSlider();
         
+//This loop creates the dropdown menu that let's you select a planet/moon to view
+//Might be worth trying to generalize this code to allow for easy dropdown creation on other pages
+//TODO: make dropdown class
 Object.keys(planets).forEach(function(planet, index){
     planetObj = planets[planet];
 
@@ -67,12 +73,9 @@ Object.keys(planets).forEach(function(planet, index){
     dropdown.appendChild(menuEntry);
     menuEntry.appendChild(label);
 
+    //mercury and venus have no moons
     if (planet !== "Mercury" && planet !== "Venus"){
-        arrow = document.createElement("img");
-        arrow.src = downArrow;
-        arrow.classList.add("arrow", `${planet}`);
-        arrow.dataset.rotation = "0";
-        arrow.onclick = expand;
+        arrow = addArrow(true, planet);
         menuEntry.append(arrow);
     }
 
@@ -96,8 +99,25 @@ Object.keys(planets).forEach(function(planet, index){
     })
 }) 
 
-function rotate(event){
-    const arrow = event.target; 
+//thought i'd add this fucntion to compact the code a bit more. but there are some other repeated steps
+//in the dropdown creation loop, this might go away when/if i decide to make a dropdown class
+function addArrow(isPlanet, planet){
+    arrow = document.createElement("img");
+    arrow.src = downArrow;
+    arrow.classList.add("arrow");
+    if (isPlanet){
+        arrow.classList.add(`${planet}`);
+    }
+    arrow.dataset.rotation = "0";
+    arrow.onclick = expand;
+    return arrow;
+}
+
+//arrow rotation logic
+function rotate(arrow){
+    if(arrow.target){
+        arrow = arrow.target; 
+    }
     let rotation = parseInt(arrow.dataset.rotation || 0, 10); 
     rotation += 180;
     arrow.dataset.rotation = rotation;
@@ -154,11 +174,16 @@ function removeLockOn(){
         options[option] = false;
     })
 }
+
+//dynamic styling for the range slider so that the left portion before the thumb gets the color i want
+//neat trick honestly but kinda hacky
+//compliments of chat gpt
 const slider=document.getElementById("speed-control");
 slider.addEventListener("input", function(){
     styleSlider();
 })
 
+//what this does is dynamiclly adjust a gradient between the left color and the right color
 function styleSlider(){
     const slider=document.getElementById("speed-control");
     const value = slider.value;
@@ -166,4 +191,13 @@ function styleSlider(){
     const max = slider.max;
     const percentage = ((value-min) / (max-min)) * 100;
     slider.style.background = `linear-gradient(to right, var(--color3) ${percentage}%, var(--foreground) ${percentage}%)`;
+}
+
+//used to hide dropdown when clicking off it
+function hideDropdown(event){
+    const dropdown = document.getElementById("dropdown-content");
+    if (!dropdown.classList.contains("hide")){
+        dropdown.classList.add("hide");
+        rotate(document.getElementById("main-arrow"));
+    }
 }
