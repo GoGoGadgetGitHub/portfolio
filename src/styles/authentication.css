@@ -1,0 +1,43 @@
+@import './styles.css';
+
+main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+#details {
+   display: block;
+   height: 50%; 
+   width: 50%;
+   max-width: 350px;
+   max-height: 300px;
+   border: 3px solid var(--foreground);
+   border-radius: 25px;
+   padding: 1%;
+   color: var(--foreground);
+   text-align: center;
+}
+
+#details input {
+   display: block;
+   background-color: var(--foreground); 
+   border: 0;
+   padding: 1%;
+   border-radius: 15px;
+   margin:auto;
+}
+
+.field {
+    margin-top: 4%;
+}
+
+.login-button{
+    width: 30%;
+    height: 10%;
+    margin-top: 10%;
+    background-color: var(--foreground);
+    border-radius: 15px;
+    border: 0;
+}
