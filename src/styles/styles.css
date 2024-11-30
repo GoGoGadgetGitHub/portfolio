@@ -61,6 +61,11 @@ main {
    margin:auto 0 auto;
 }
 
+.nav a {
+    color: var(--background);
+    text-decoration: none;
+}
+
 .nav-buttons {
    display: inline; 
    margin-right: 15px;
