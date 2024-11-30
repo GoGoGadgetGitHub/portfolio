@@ -14,8 +14,8 @@ main {
 #details {
    display: block;
    width: 50%;
-   min-width: 350px;
-   max-width: 400px;
+   min-width: 450px;
+   max-width: 500px;
    border: 3px solid var(--foreground);
    border-radius: 25px;
    padding: 1%;
@@ -31,6 +31,7 @@ main {
    border-radius: 15px;
    margin:auto;
    font-size: 1rem;
+   width: 60%;
 }
 
 .field {
@@ -40,14 +41,12 @@ main {
 #details button{
     width: 30%;
     height: 10%;
-    margin-top: 10%;
+    margin-top: 5%;
+    margin-bottom: 5%;
     background-color: var(--foreground);
     border-radius: 15px;
     border: 0;
     font-size: 1rem;
-}
-.bottom-margin{
-    margin-bottom: 1%;
 }
 
 #details input:focus {
