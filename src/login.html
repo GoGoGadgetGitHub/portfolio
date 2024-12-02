@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Log In</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="./styles/authentication.css" />
-    </head>
-    <body>
-        <main id="main">
-            <div id="details">
-                <h1 id="headding">Log In</h1>
-                <form id="login">
-                    <div class="field"><label>e-mail</label><input id="email" type="email" required/></div>
-                    <div class="field"><label>password</label><input id="password" type="password" required/></div>
-                    <p id="message"></p>
-                    <button type="submit" id="submit">Log in</button>
-                </form>
-                <p id="no-account-prompt">If you don't have an account click <a href="./signup.html">here</a> to make one</p>
-            </div>
-        </main>
-    </body>
-    <script src="./js/authentication.js" type="module"></script>
-    
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Log In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./styles/authentication.css" />
+  </head>
+  <body>
+    <main id="main">
+      <div id="details">
+        <h1 id="headding">Log In</h1>
+        <form id="login">
+          <div class="field"><label>e-mail</label><input id="email" type="email" required/></div>
+          <div class="field"><label>password</label><input id="password" type="password" required/></div>
+          <p id="message"></p>
+          <button type="submit" id="submit">Log in</button>
+        </form>
+        <p id="login-text">Forgot passowrd? <a href="./signup.html">here</a></p>
+        <p id="login-text">No account? <a href="./signup.html">Create one.</a></p>
+
+      </div>
+    </main>
+  </body>
+  <script src="./js/authentication.js" type="module"></script>
+
 </html>

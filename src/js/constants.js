@@ -6,15 +6,15 @@ export const SUN_RADIUS = 200
 ;
 export const SCENE = new THREE.Scene();
 export const CAMERA = new THREE.PerspectiveCamera(
-    45,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    100000
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100000
 );
 var canvRefrence = document.getElementById("solarsystem-canvas");
 export const RENDERER = new THREE.WebGLRenderer({
-    antialias: true,
-    canvas: canvRefrence
+  antialias: true,
+  canvas: canvRefrence
 });
 RENDERER.setSize(window.innerWidth, window.innerHeight);
 RENDERER.setPixelRatio(window.devicePixelRatio);

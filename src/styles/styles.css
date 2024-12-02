@@ -1,5 +1,3 @@
-@import "./animations.css";
-
 :root {
     /* Special */
     --background: #0D0D10;
@@ -66,7 +64,7 @@ main {
     text-decoration: none;
 }
 
-.nav-buttons {
+.nav-buttons, .user, .login-signout{
    display: inline; 
    margin-right: 15px;
 }

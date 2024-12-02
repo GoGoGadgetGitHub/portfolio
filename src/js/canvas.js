@@ -40,12 +40,12 @@ import tritonTexture from '../assets/Triton.png';
 //Skybox
 const cubeTextureLoader = new THREE.CubeTextureLoader();
 SCENE.background = cubeTextureLoader.load([
-    starsPX,
-    starsNX,
-    starsPY,
-    starsNY,
-    starsPZ,
-    starsNZ
+  starsPX,
+  starsNX,
+  starsPY,
+  starsNY,
+  starsPZ,
+  starsNZ
 ]);
 
 //Objects
@@ -88,14 +88,14 @@ neptune.addMoon('Triton', 0.23, 13, 0.0004, 0.0007, tritonTexture);
 
 
 export const planets = {
-    Mercury: mercury, 
-    Venus: venus, 
-    Earth: earth, 
-    Mars: mars, 
-    Jupiter: jupiter, 
-    Saturn: saturn, 
-    Uranus: uranus, 
-    Neptune: neptune
+  Mercury: mercury, 
+  Venus: venus, 
+  Earth: earth, 
+  Mars: mars, 
+  Jupiter: jupiter, 
+  Saturn: saturn, 
+  Uranus: uranus, 
+  Neptune: neptune
 };
 
 //Lights
@@ -104,42 +104,42 @@ SCENE.add(ambientLight);
 
 //Animation
 function animate(){
-    let speed = document.getElementById("speed-control").value;
-    //Sun Rotation
-    sun.mesh.rotateY(0.004 * speed);
+  let speed = document.getElementById("speed-control").value;
+  //Sun Rotation
+  sun.mesh.rotateY(0.004 * speed);
 
-    Object.keys(planets).forEach(function(key, index){
-        var planet = planets[key];
+  Object.keys(planets).forEach(function(key, index){
+    var planet = planets[key];
 
-        //Planet Orbits
-        planet.orbitParentObject.rotateY(planet.orbitSpeed * speed);
-        
-        //Planet Rotation
-        planet.mesh.rotation.y += planet.rotationSpeed * speed;
+    //Planet Orbits
+    planet.orbitParentObject.rotateY(planet.orbitSpeed * speed);
 
-        //Moon Orbits and rotations
-        Object.keys(planet.moons).forEach(function(key, index){
-            const moon = planet.moons[key];
-            
-            moon.orbitObject.rotateY(((moon.orbitSpeed * speed) - planet.rotationSpeed) * speed);
-            
-            moon.mesh.rotateY(moon.rotationSpeed * speed);
-            
-            
-            //Lock on for moons
-            if (options[moon.name]){
-                planet.lockOn(moon, options.RotationLock);
-            }
-        })
+    //Planet Rotation
+    planet.mesh.rotation.y += planet.rotationSpeed * speed;
 
-        //Lock on planets
-        if (options[planet.name]){
-            planet.lockOn(undefined, options.RotationLock);
-        };
+    //Moon Orbits and rotations
+    Object.keys(planet.moons).forEach(function(key, index){
+      const moon = planet.moons[key];
+
+      moon.orbitObject.rotateY(((moon.orbitSpeed * speed) - planet.rotationSpeed) * speed);
+
+      moon.mesh.rotateY(moon.rotationSpeed * speed);
+
+
+      //Lock on for moons
+      if (options[moon.name]){
+        planet.lockOn(moon, options.RotationLock);
+      }
     })
 
-    CONTROLS.update();
-    RENDERER.render(SCENE, CAMERA);
+    //Lock on planets
+    if (options[planet.name]){
+      planet.lockOn(undefined, options.RotationLock);
+    };
+  })
+
+  CONTROLS.update();
+  RENDERER.render(SCENE, CAMERA);
 }
 
 //An event listener for the mouse wheel to change the camera distance from the locked on object
@@ -148,31 +148,31 @@ function animate(){
 //yes i know the indentation is fucking horrible here
 
 document.addEventListener('wheel', function(e) {
-    const delta = e.deltaY;
-    Object.keys(options).forEach(function(i, index){
-        const planet = planets[i];
-        if (options[i] && planet!="None"){
-            if (planet != undefined){
-                planet.updateDistance(delta * planet.radius * 0.2);}
-            else{
-                Object.keys(planets).forEach(function(j, index){
-                    var moon = planets[j].getMoon(i);
-                    if (moon != undefined){
-                        planets[j].getMoon(i).cameraDistanceFromMoon += delta * moon.radius * 0.2;
-                        if (moon.cameraDistanceFromMoon < 0.5){
-                            moon.cameraDistanceFromMoon = 0.5;
-                        }
-                    }
-                });
+  const delta = e.deltaY;
+  Object.keys(options).forEach(function(i, index){
+    const planet = planets[i];
+    if (options[i] && planet!="None"){
+      if (planet != undefined){
+        planet.updateDistance(delta * planet.radius * 0.2);}
+      else{
+        Object.keys(planets).forEach(function(j, index){
+          var moon = planets[j].getMoon(i);
+          if (moon != undefined){
+            planets[j].getMoon(i).cameraDistanceFromMoon += delta * moon.radius * 0.2;
+            if (moon.cameraDistanceFromMoon < 0.5){
+              moon.cameraDistanceFromMoon = 0.5;
             }
-        }
-    });
+          }
+        });
+      }
+    }
+  });
 });
 
 window.addEventListener('resize', function(){
-    CAMERA.aspect = window.innerWidth / window.innerHeight;
-    CAMERA.updateProjectionMatrix();
-    RENDERER.setSize(window.innerWidth, window.innerHeight);
+  CAMERA.aspect = window.innerWidth / window.innerHeight;
+  CAMERA.updateProjectionMatrix();
+  RENDERER.setSize(window.innerWidth, window.innerHeight);
 }); 
 
 
