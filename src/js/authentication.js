@@ -52,7 +52,8 @@ if (signup){
       var { data, error } = await supabase.auth.signUp({
         email,
         password,
-      }
+      })
+      console.log(error.code)
       //there was an error with user creation
       if (error.code === "user_already_exists") {
         console.log("alsdhasjg")
@@ -75,8 +76,8 @@ if (signup){
       CreateNewUser(username);
 
     } catch (err) {
-      console.log("big ol bad error")
-      console.error(err);
+      message.textContent = "Please make sure you entered a valid email adress."
+      console.error(err)
     }
 
   })
@@ -96,7 +97,7 @@ function accountExists() {
   const message = document.getElementById("message")
   const p = document.createElement("p")
   const a = document.createElement("a")
-  p.textContent = "User alresdy exists"
+  p.textContent = "User already exists "
   a.textContent = "Login"
   a.href = "../login.html"
   message.appendChild(p)

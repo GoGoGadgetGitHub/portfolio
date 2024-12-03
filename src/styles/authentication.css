@@ -18,7 +18,7 @@ main {
   max-width: 500px;
   border: 3px solid var(--foreground);
   border-radius: 25px;
-  padding: 1%;
+  padding: 4%;
   color: var(--foreground);
   text-align: center;
 }
@@ -52,6 +52,10 @@ main {
 #message{
   height: 1rem;
   margin-top: 3%;
+}
+
+#message a, #message p{
+  display: inline;
 }
 
 #details input:focus {
