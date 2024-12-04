@@ -53,9 +53,8 @@ if (signup){
         email,
         password,
       })
-      console.log(error.code)
       //there was an error with user creation
-      if (error.code === "user_already_exists") {
+      if (error && error.code === "user_already_exists") {
         console.log("alsdhasjg")
         accountExists()
         return
@@ -73,7 +72,8 @@ if (signup){
         return
       }
 
-      CreateNewUser(username);
+      await CreateNewUser(username);
+      window.location.href = "../login.html";
 
     } catch (err) {
       message.textContent = "Please make sure you entered a valid email adress."
@@ -81,7 +81,7 @@ if (signup){
     }
 
   })
-}  
+}
 
 async function CreateNewUser(username) {
   const {error} = await supabase
@@ -94,6 +94,7 @@ async function CreateNewUser(username) {
 
 function accountExists() {
   console.log("asjdhlka")
+  message.innerContenr = ""
   const message = document.getElementById("message")
   const p = document.createElement("p")
   const a = document.createElement("a")

@@ -119,7 +119,7 @@ main {
   appearance: none;
   width: 1.3rem;
   height: 1.3rem;
-  border-radius: 50%; 
+  border-radius: 50%;
   border: none;
   background: var(--color3);
   cursor: pointer;

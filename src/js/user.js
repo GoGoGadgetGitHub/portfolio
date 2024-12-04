@@ -1,23 +1,43 @@
 import { supabase } from "./supabaseClient.js";
 
-const loggedin = document.getElementById("user");
+const auth = document.getElementById("auth");
+const logingLink = document.getElementById("login-link");
 const dropdown = document.getElementById("dropdown-content")
-getUser()
+authCheck()
+
+async function authCheck(){
+  if (await checkUser()) {
+    getUser()
+  }
+}
 
 async function getUser() {
-  var {data: {user}, error} = await supabase.auth.getUser()
+
+  var {data: {user}, userError} = await supabase.auth.getUser()
+
+  if (userError){
+    console.log(`Error getting user: ${error.message}`)
+    return
+  }
+
   const id = user.id
-  console.log(id)
-  var {data: profile, error} = await supabase
+  var {data: profile, profileError} = await supabase
     .from('profiles')
     .select('username')
     .eq('id', id)
     .single()
-  console.log(error)
+
+  if (profileError){
+    console.log(`Error fetching profile: ${error}`)
+  }
+
   const username = profile.username
-  loggedin.textContent = username
-  loggedin.clicked = expand
+
+  auth.textContent = username
+  auth.onclick = expand
+  populate()
 }
+
 
 function expand() {
   if (dropdown.classList.contains("hide")){
@@ -28,11 +48,33 @@ function expand() {
 }
 
 function populate() {
-  const options = ["Log Out", "Delete Accout"]
-  for (var opt in options) {
-    entry = document.createElement("div")
-    entry.textContent = opt
-    dropdown.appendChild(entry)
+  entry = document.createElement("div")
+  entry.id = "user-div"
+  entry.textContent = "Log out"
+  dropdown.appendChild(entry)
+  entry.onclick = logout
+  entry = document.createElement("div")
+  entry.id = "user-div"
+  entry.textContent = "Delete Account"
+  dropdown.appendChild(entry)
+}
+
+async function logout(){
+  const {error} = await supabase.auth.signOut()
+  location.reload()
+}
+
+async function checkUser() {
+  console.log("checking user")
+  const { data: {session}, error} = await supabase.auth.getSession()
+  if (error){
+    console.log(`Can't check session for some odd reason: ${error.message}`)
+    return false
   }
-  
+  if (session){
+    console.log("user found")
+    return true
+  }
+  console.log("no user logged in")
+  return false
 }
