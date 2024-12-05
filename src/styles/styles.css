@@ -43,7 +43,6 @@ main {
   display: none;
 }
 
-
 .header {
     background-color: var(--color15);
     color: var(--background);
@@ -56,31 +55,16 @@ main {
     top: 0;
 }
 
-.nav {
-   position: relative;
-   width: max-content;
+#auth {
    display: inline;
-   text-align: right;
-   vertical-align: middle;
-   margin:auto 0 auto;
-   list-style-type: none;
-}
-
-.nav a {
-    color: var(--background);
-    text-decoration: none;
-}
-
-#projects, #auth {
-   display: inline;
-   margin-right: 15px;
-   width: max-content;
+   text-align: center;
    cursor: pointer;
 }
 
-
-#projects:hover, #auth:hover {
-  
+#auth-div {
+  display: block;
+  position: relative;
+  margin: auto 8%;
 }
 
 .title {
@@ -183,7 +167,9 @@ a {
   background-color: var(--foreground);
   width: max-content;
   top: 185%;
+  right: 50%;
   max-height: 85vh;
+  transform: translate(50%);
 }
 
 #user-div {

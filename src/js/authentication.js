@@ -1,8 +1,9 @@
 import { supabase } from "./supabaseClient.js";
 
-//this file is used for both sign up and login so i need to check which is happening
+//this file is used for sign up, login and password reset so i need to check which is happening
 const login = document.getElementById("login");
 const signup = document.getElementById("signup");
+const passwordReset = document.getElementById("password-reset");
 const message = document.getElementById("message");
 
 if (login){
@@ -80,6 +81,31 @@ if (signup){
       console.error(err)
     }
 
+  })
+}
+
+if (passwordReset) {
+  passwordReset.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+
+    const {data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: '../resetPassword.html'
+    })
+    
+    if (error) {
+      console.log(error.message)
+    }
+    else {
+      console.log("no error email should have been sent")
+    }
+
+    try {
+    } catch (err) {
+      console.log("big ol bad error")
+      console.error(err);
+    }
   })
 }
 
