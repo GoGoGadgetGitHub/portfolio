@@ -48,7 +48,7 @@ function expand() {
 }
 
 function populate() {
-  entry = document.createElement("div")
+  let entry = document.createElement("div")
   entry.id = "user-div"
   entry.textContent = "Log out"
   dropdown.appendChild(entry)
