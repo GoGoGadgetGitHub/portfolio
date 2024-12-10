@@ -80,14 +80,21 @@ if (signup){
   })
 }
 
-if (passwordForget) {
-  passwordReset.addEventListener("submit", async (event) => {
+
+
+//TODO: I'm scrapping passowrds. Passowrdless loging is the future
+//      also password reset is turning out to be allot harder then
+//      i thought it was going to be and might be overkill for this project
+
+
+if (passwordForgot) {
+  passwordForgot.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const email = document.getElementById("email").value;
 
     const {data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://gogogadgetgithub.github.io/portfolio/resetPassword.html'
+      redirectTo: 'http://localhost:1234/resetPassword.html'
     })
 
     if (error) {
@@ -95,11 +102,14 @@ if (passwordForget) {
     }
     else {
       console.log("no error email should have been sent")
+      //email.classList.add('hide')
+      message.textContent = "Please check your email. You can close this tab."
     }
   })
 }
 
 if (passwordReset) {
+  console.log('a;lsdkjf')
   passwordReset.addEventListener("submit", async (event) => {
     event.preventDefault();
 
