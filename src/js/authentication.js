@@ -3,155 +3,73 @@ import { supabase } from "./supabaseClient.js";
 //this file is used for sign up, login and password reset so i need to check which is happening
 const login = document.getElementById("login");
 const signup = document.getElementById("signup");
-const passwordReset = document.getElementById("password-reset");
-const passwordForgot = document.getElementById("forgot-password");
 const message = document.getElementById("message");
 
-if (login){
+if (login) {
   login.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    var { data, error } = await supabase.auth.signInWithOtp({
       email,
-      password,
-    });
+      options: {
+        shouldCreateUser: false,
+      }
+    })
 
     if (error) {
       message.textContent = error.message;
-      console.log(error.message)
     } else {
       window.location.href = "./index.html";
-      console.log(data); // Handle user data
     }
-
   })
 }
 
-if (signup){
+//TODO: ok so i need to set up a trigger in the database for user accoutn createion
+//that will add a profile entry
+//The profile table will have UID as fk with on delete cascade
+//this will ensure that unconfirmed profiles are deleted and make sure that when
+//the user deletes their account their profile gets romoved too
+//this on delete cascade option will need to be set on other child tables of profile aswell
+if (signup) {
+
   document.getElementById("signup").addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const passwordConf = document.getElementById("password-conf").value;
     const username = document.getElementById("username").value;
 
-    if (password !== passwordConf) {
-      message.textContent = "passwords don't match..."
-      return
-    }
-
+    // if the account already exists then this shoul just log them in (don know if i should be notifying the user of this or not)
     try {
-
-      var { data, error } = await supabase.auth.signUp({
+      var { data, error } = await supabase.auth.signInWithOtp({
         email,
-        password,
       })
 
-      //there was an error with user creation
-      if (error && error.code === "user_already_exists") {
-        accountExists()
-        return
-      }
-
-      //once user is cresated sign them in add their chosen username to the profiles table
-      var { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      //there was an error with user login
-      if (error){
+      //there was an error with user login/signup
+      if (error) {
         console.log(error.message)
         return
       }
 
       await CreateNewUser(username);
-      window.location.href = "../login.html";
+
+      //the user should be logged in so they can just go to the home page
 
     } catch (err) {
-      message.textContent = "Please make sure you entered a valid email adress."
+      message.textContent = "some big bad scary error"
       console.error(err)
     }
 
   })
 }
-
-
-
-//TODO: I'm scrapping passowrds. Passowrdless loging is the future
-//      also password reset is turning out to be allot harder then
-//      i thought it was going to be and might be overkill for this project
-
-
-if (passwordForgot) {
-  passwordForgot.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const email = document.getElementById("email").value;
-
-    const {data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:1234/resetPassword.html'
-    })
-
-    if (error) {
-      console.log(error.message)
-    }
-    else {
-      console.log("no error email should have been sent")
-      //email.classList.add('hide')
-      message.textContent = "Please check your email. You can close this tab."
-    }
-  })
-}
-
-if (passwordReset) {
-  console.log('a;lsdkjf')
-  passwordReset.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const password = document.getElementById("password").value;
-    const passwordConf = document.getElementById("password-conf").value;
-
-    if (password !== passwordConf) {
-      message.textContent = "Passwords don't match..."
-      return
-    }
-
-    const {data, error } = await supabase.auth.updateUser({
-      password: password
-    })
-
-    if (error) {
-      console.log(error.message)
-    }
-    else {
-      console.log("no error, passowrd should have been reset")
-      window.location.href = "../login.html"
-    }
-  })
-}
+//NOTE: this will need to change as a result of the above todo
 
 async function CreateNewUser(username) {
-  const {error} = await supabase
+  const { error } = await supabase
     .from('profiles')
-    .insert({username:username})
-  if (error){
+    .insert({ username: username })
+  if (error) {
     console.log(error.message)
   }
-}
-
-function accountExists() {
-  message.innerContenr = ""
-  const message = document.getElementById("message")
-  const p = document.createElement("p")
-  const a = document.createElement("a")
-  p.textContent = "User already exists "
-  a.textContent = "Login"
-  a.href = "../login.html"
-  message.appendChild(p)
-  message.appendChild(a)
 }

@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Log In</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="./styles/authentication.css" />
-  </head>
-  <body>
-    <main id="main">
-      <div id="details">
-        <h1 id="headding">Log In</h1>
-        <form id="login">
-          <div class="field"><label>e-mail</label><input id="email" type="email" required/></div>
-          <div class="field"><label>password</label><input id="password" type="password" required/></div>
-          <div id="message"></div>
-          <button type="submit" id="submit">Log in</button>
-        </form>
-        <div id="message"><p>No account? <a href="./signup.html">Create one.</a></p></div>
-        <div id="message"><a href="./forgotPassword.html">Forgot password?</a></div>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Log In</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./styles/authentication.css" />
+</head>
+
+<body>
+  <main id="main">
+    <div id="details">
+      <h1 id="headding">Log In</h1>
+      <form id="login">
+        <div class="field"><label>e-mail</label><input id="email" type="email" required /></div>
+        <div id="message"></div>
+        <button type="submit" id="submit">Log in</button>
+      </form>
+      <div id="message">
+        <p>No account? <a href="./signup.html">Create one.</a></p>
       </div>
-    </main>
-  </body>
-  <script src="./js/authentication.js" type="module"></script>
+    </div>
+  </main>
+</body>
+
+<script src="./js/authentication.js" type="module"></script>
 
 </html>
