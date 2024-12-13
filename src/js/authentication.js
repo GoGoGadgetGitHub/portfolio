@@ -1,9 +1,18 @@
 import { supabase } from "./supabaseClient.js";
-import { getUsername, checkUser } from "./user.js"
+/*NOTE:
+This is an extreamly simplified authentication flow. I spent way too long trying to get this to work
+with first a more traditional password and email flow, which got stuck at reset passowrd.
+Then i tried to use just email login and sign up with usernames but this flopped aswell when trying
+to update the username colomn of the profiles table so that the user can have a username
+Considering this has taken me over a week to try and get working i opted for the most simple approach
+i can. Just email confirmation login. No usernames, no passowrds just email. I might come back and try
+to improve this later but i really just want to move on past this and work on some actual projects.
 
-//this file is used for sign up, login and password reset so i need to check which is happening
+I admit this is a cop out but this is also just a protfolio page which needs user acounts for one simple
+task. So i believe in this case it's justified
+*/
+
 const login = document.getElementById("login");
-const signup = document.getElementById("signup");
 const message = document.getElementById("message");
 
 if (login) {
@@ -14,21 +23,20 @@ if (login) {
 
     var { data, error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        shouldCreateUser: false,
-      }
     })
 
     if (error) {
       message.textContent = error.message;
     } else {
-      window.location.href = "./index.html";
+      //window.location.href = "./index.html";
+      document.getElementById("submit").classList.add("hide")
+      document.getElementById("no-account").classList.add("hide")
+      message.textContent = "Check your email and click the link to login. \n You can close this tab."
     }
   })
 }
 
-if (signup) {
-
+/*if (signup) {
   document.getElementById("signup").addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -48,7 +56,9 @@ if (signup) {
         return
       }
 
-      console.log(data)
+      var { data: { user }, userError } = await supabase.auth.getUser()
+
+      console.log(user)
 
       //if the user did not exist prior to signInWithOtp call they would now
       //have a username of null deu to the trigger on the auth.user table
@@ -78,9 +88,6 @@ if (signup) {
   })
 }
 
-async function userExists() {
-  return false
-}
 
 async function updateUsename(username) {
   const { error } = await supabase
@@ -91,4 +98,4 @@ async function updateUsename(username) {
     return false
   }
   return true
-}
+}*/

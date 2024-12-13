@@ -7,13 +7,24 @@ authCheck()
 
 async function authCheck() {
   if (await checkUser()) {
-    auth.textContent = await getUsername()
+    auth.textContent = await getEmail()
     auth.onclick = expand
     populate()
   }
 }
 
-export async function getUsername() {
+async function getEmail() {
+  var { data: { user }, userError } = await supabase.auth.getUser()
+
+  if (userError) {
+    console.log(`Error getting user: ${error.message}`)
+    return
+  }
+
+  return user.email
+}
+
+/*export async function getUsername() {
 
   var { data: { user }, userError } = await supabase.auth.getUser()
 
@@ -37,7 +48,7 @@ export async function getUsername() {
 
   const username = profile.username
   return username
-}
+}*/
 
 
 function expand() {
@@ -62,6 +73,9 @@ function populate() {
 
 async function logout() {
   const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.log(`Error signing out: ${error.message}`)
+  }
   location.reload()
 }
 
