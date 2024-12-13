@@ -7,11 +7,13 @@ authCheck()
 
 async function authCheck() {
   if (await checkUser()) {
-    getUser()
+    auth.textContent = await getUsername()
+    auth.onclick = expand
+    populate()
   }
 }
 
-async function getUser() {
+export async function getUsername() {
 
   var { data: { user }, userError } = await supabase.auth.getUser()
 
@@ -30,13 +32,11 @@ async function getUser() {
 
   if (profileError) {
     console.log(`Error fetching profile: ${error}`)
+    return
   }
 
   const username = profile.username
-
-  auth.textContent = username
-  auth.onclick = expand
-  populate()
+  return username
 }
 
 
@@ -65,7 +65,7 @@ async function logout() {
   location.reload()
 }
 
-async function checkUser() {
+export async function checkUser() {
   console.log("checking user")
   const { data: { session }, error } = await supabase.auth.getSession()
   if (error) {

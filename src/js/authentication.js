@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient.js";
+import { getUsername, checkUser } from "./user.js"
 
 //this file is used for sign up, login and password reset so i need to check which is happening
 const login = document.getElementById("login");
@@ -26,12 +27,6 @@ if (login) {
   })
 }
 
-//TODO: ok so i need to set up a trigger in the database for user accoutn createion
-//that will add a profile entry
-//The profile table will have UID as fk with on delete cascade
-//this will ensure that unconfirmed profiles are deleted and make sure that when
-//the user deletes their account their profile gets romoved too
-//this on delete cascade option will need to be set on other child tables of profile aswell
 if (signup) {
 
   document.getElementById("signup").addEventListener("submit", async (event) => {
@@ -40,8 +35,9 @@ if (signup) {
     const email = document.getElementById("email").value;
     const username = document.getElementById("username").value;
 
-    // if the account already exists then this shoul just log them in (don know if i should be notifying the user of this or not)
     try {
+
+      //this will create a user if one does not exist
       var { data, error } = await supabase.auth.signInWithOtp({
         email,
       })
@@ -52,24 +48,47 @@ if (signup) {
         return
       }
 
-      await CreateNewUser(username);
+      console.log(data)
+
+      //if the user did not exist prior to signInWithOtp call they would now
+      //have a username of null deu to the trigger on the auth.user table
+      //if this is the case their usename should be updated with the one they
+      //entered, othewise they will just be logged in an their username will 
+      //stay the same
+
+      if (userExists()) {
+        console.log("this is where you redirect existing user")
+        //window.location.href = '../index.html'
+        return
+      }
+
+      if (!updateUsename(username)) {
+        console.log("error updating username")
+        return
+      }
 
       //the user should be logged in so they can just go to the home page
+      console.log("this is where you redirect the new user")
+      //window.location.href = '../index.html'
 
     } catch (err) {
       message.textContent = "some big bad scary error"
       console.error(err)
     }
-
   })
 }
-//NOTE: this will need to change as a result of the above todo
 
-async function CreateNewUser(username) {
+async function userExists() {
+  return false
+}
+
+async function updateUsename(username) {
   const { error } = await supabase
     .from('profiles')
     .insert({ username: username })
   if (error) {
     console.log(error.message)
+    return false
   }
+  return true
 }
