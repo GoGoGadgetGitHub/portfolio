@@ -16,6 +16,7 @@ const login = document.getElementById("login");
 const message = document.getElementById("message");
 
 if (login) {
+  message.textContent = "If you do not have an account one will be made for you once you have provided your email."
   login.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -30,7 +31,6 @@ if (login) {
     } else {
       //window.location.href = "./index.html";
       document.getElementById("submit").classList.add("hide")
-      document.getElementById("no-account").classList.add("hide")
       message.textContent = "Check your email and click the link to login. \n You can close this tab."
     }
   })

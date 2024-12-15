@@ -22,6 +22,7 @@
     --color14: #D2936C;
     --color15: #c2c2c3;
 }
+
 @font-face {
     font-family: "customFont";
     src: "../fonts/BitstreamVeraSansMono/BitstromWeraNerdFont-Regular.ttf";
@@ -40,7 +41,7 @@ main {
 }
 
 .hide {
-  display: none;
+    display: none;
 }
 
 .header {
@@ -56,20 +57,35 @@ main {
 }
 
 #auth {
-   display: inline;
-   text-align: center;
-   cursor: pointer;
+    display: inline;
+    text-align: center;
+    cursor: pointer;
+    background: var(--background);
+    color: var(--foreground);
+    border: 7px solid var(--background);
+    border-radius: 15px;
+}
+
+#auth:hover {
+    color: var(--foreground);
+    background: var(--color3);
+    border-color: var(--color3);
+}
+
+#auth a {
+    color: var(--foreground);
+    text-decoration: none;
 }
 
 #auth-div {
-  display: block;
-  position: relative;
-  margin: auto 8%;
+    display: block;
+    position: relative;
+    margin: auto 8%;
 }
 
 .title {
     display: inline;
-    margin:auto 6px auto;
+    margin: auto 6px auto;
 }
 
 h2 {
@@ -80,7 +96,7 @@ h2 {
 }
 
 .about-me {
-    display: flex;
+    display: none;
     justify-content: center;
     align-content: space-between;
     flex-wrap: wrap;
@@ -127,6 +143,7 @@ a {
     position: relative;
     transition: all .2s ease-in-out;
 }
+
 .project:hover {
     transform: scale(1.1);
 }
@@ -138,7 +155,7 @@ a {
     height: 8rem;
 }
 
-.image-window img{
+.image-window img {
     width: 100%;
     max-height: 100%;
     object-fit: cover;
@@ -156,23 +173,23 @@ a {
     width: 80%;
     margin: auto;
     padding-top: 3%;
-    padding-bottom:3%;
+    padding-bottom: 3%;
     height: 30%;
 }
 
 #dropdown-content {
-  position: absolute;
-  border: 5px solid var(--foreground);
-  border-radius: 15px;
-  background-color: var(--foreground);
-  width: max-content;
-  top: 185%;
-  right: 50%;
-  max-height: 85vh;
-  transform: translate(50%);
+    position: absolute;
+    border: 5px solid var(--foreground);
+    border-radius: 15px;
+    background-color: var(--foreground);
+    width: max-content;
+    top: 185%;
+    right: 50%;
+    max-height: 85vh;
+    transform: translate(50%);
 }
 
 #user-div {
-  width: max-content;
-  cursor: pointer;
+    width: max-content;
+    cursor: pointer;
 }
