@@ -1,9 +1,7 @@
-get a simple edge function working to get the hang of it
+//get a simple edge function working to get the hang of it
 
 have that edge fucnction use the osu api the fetch the recent plays of a spesified user
 
-then make a wrapper js file that wraps the edge function call to make using it simpler
+I need to find the right end point, odd are it's api/v2/scores. but this seems like it needs authentication from a spesicfic user to make it do what i want it to
 
-i'm confused on how to make sure that my osu client secret remains secret i think the idea is to have the key set as an enviremnet variable in supabase then have the edge function access that variable
-
-
+then make a wrapper js file that wraps the edge function call to make using it simpler(in progress)
