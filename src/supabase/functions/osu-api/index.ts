@@ -1,53 +1,66 @@
-// Setup type definitions for built-in Supabase Runtime APIs
-// TODO: do error handeling and error checking
-//maybe find dome way to make this dry code and generalise
-//make a list of endpoints you'll need
-//think of how your gonna save this data in the database
-//
+//NOTE: This code seems really messy maybe i should split fetching the token into a new file
+
+import { corsHeaders } from "../_shared/cors.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 Deno.serve(async (req) => {
   //CORS Preflight
   if (req.method === "OPTIONS") {
-    console.log("Preflight");
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-      status: 204,
+    console.log("Preflight...");
+    return new Response("ok", {
+      headers: { ...corsHeaders },
     });
   }
 
   const { userID } = await req.json();
-  console.log(userID);
 
-  //Getting access token
-  const tokenResponse = await fetch("http://osu.ppy.sh/oauth/token", {
-    method: "POST",
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: Deno.env.get("OSU_CLIENT_ID"),
-      client_secret: Deno.env.get("OSU_CLIENT_SECRET"),
-      grant_type: "client_credentials",
-      scope: "public",
-    }),
-  });
+  let accessToken;
+  let tokenResponse;
+  try {
+    tokenResponse = await fetch("http://osu.ppy.sh/oauth/token", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: Deno.env.get("OSU_CLIENT_ID"),
+        client_secret: Deno.env.get("OSU_CLIENT_SECRET"),
+        grant_type: "client_credentials",
+        scope: "public",
+      }),
+    });
 
-  const tokenData = await tokenResponse.json();
-  const accessToken = tokenData.access_token;
+    if (!tokenResponse.ok) {
+      console.error(
+        `HTTP error: ${tokenResponse.status} - ${tokenResponse.statusText}. In token fetch`,
+      );
+      return new Response("Failed to fetch api token", {
+        headers: { ...corsHeaders },
+        status: tokenResponse.status,
+      });
+    }
+
+    const tokenData = await tokenResponse.json();
+    accessToken = tokenData.access_token;
+  } catch (error) {
+    console.error("Error fetching API token:", error);
+    return new Response("Error fetching API token", {
+      headers: { ...corsHeaders },
+      status: 500,
+    });
+  }
 
   //Setting up user recent activity fetch
   const urlApi = new URL(
     `https://osu.ppy.sh/api/v2/users/${userID}/scores/recent`,
   );
+
   const params = {
-    "user_id": userID,
+    "include_fails": "1",
+    "limit": "9999",
   };
+
   Object.keys(params).forEach((key) =>
     urlApi.searchParams.append(key, params[key])
   );
@@ -59,24 +72,37 @@ Deno.serve(async (req) => {
     "Authorization": `Bearer ${accessToken}`,
   };
 
-  console.log("fetching...");
-  const response = await fetch(urlApi, {
-    method: "GET",
-    headers,
-  });
-  console.log("we got somthing back");
+  let response;
+  try {
+    response = await fetch(urlApi, {
+      method: "GET",
+      headers,
+    });
 
-  console.log(response.ok);
-  console.log(response.status);
-  console.log(response.body);
+    if (!response.ok) {
+      console.error(
+        `HTTP error: ${response.status} - ${response.statusText}`,
+      );
+      return new Response("Failed to fetch recentplays", {
+        headers: { ...corsHeaders },
+        status: response.status,
+      });
+    }
+  } catch (error) {
+    console.log("Error fetching recent plays:", error);
+    return new Response("Error fetching recent plays", {
+      headers: { ...corsHeaders },
+      status: 500,
+    });
+  }
 
   const data = await response.json();
+  console.log(data);
+
   return new Response(JSON.stringify(data), {
     headers: {
+      ...corsHeaders,
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
     },
     status: 200,
   });
