@@ -2,7 +2,7 @@
 //the osu API
 
 export async function recentPlays(userID) {
-  const url = "http://localhost:54321/functions/v1/osu-api";
+  const url = "http://127.0.0.1:54321/functions/v1/osu-api";
 
   const headers = {
     "Content-Type": "application/json",
@@ -28,7 +28,7 @@ export async function recentPlays(userID) {
 }
 
 (async () => {
-  const plays = await recentPlays("22613198");
+  const plays = await recentPlays("3982856");
   if (plays) {
     console.log(plays);
   }

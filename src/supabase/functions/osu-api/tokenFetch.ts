@@ -1,70 +1,91 @@
-import { corsHeaders } from "../_shared/cors.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 export async function getToken() {
-  const supabaseUrl = Deno.env.get("SUPABASE_API");
+  //Create supabase client
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const supabase = createClient(supabaseUrl, serviceKey);
 
-  const { token, selectError } = await supabase
+  //Get token from database
+  /*
+  const tableName = "token_cahe";
+  const params = new URLSearchParams({ token_name: "osu_api_token" });
+  const url = `${supabaseUrl}/rest/v1/${tableName}?${params}`;
+  console.log(url);
+  const response = await fetch(url, {
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      Accept: "application/vdn.pgrst.object+json",
+    },
+  });
+
+  if (!response.ok) {
+    console.error("api be bugging");
+  }
+
+  const { token, expires_in } = await response.json();
+  console.log(token, expires_in);
+  */
+
+  const { data: token, error: selectError } = await supabase
     .from("token_cache")
     .select("token, created_at")
     .eq("token_name", "osu_api_token")
     .single();
 
   if (selectError) {
-    console.error(`Error fetching token from database: ${selectError}`);
+    console.error(
+      `Error fetching token from database: ${selectError.message}`,
+    );
   }
 
-  if (!token) {
-    const newToken = await fetchToken();
-    if (newToken instanceof Response) {
-      return newToken;
+  //Checking if token is still valid
+  if (token) {
+    console.log("token found");
+    const { access_token, expires_in } = token.token;
+
+    const createdAt = new Date(token.created_at).getTime();
+    const expiresAt = createdAt + expires_in * 1000;
+    const now = Date.now();
+
+    console.log(expires_in, createdAt, expiresAt, now);
+
+    //Token is still valid, return it
+    if (now < expiresAt) {
+      console.log("Token is valid");
+      return access_token;
     }
-
-    const { insertError } = await supabase
-      .from("contries")
-      .insert({ token_name: "osu_api_token", token: newToken });
-
-    if (insertError) {
-      console.error(`Error inserting new token into table: ${insertError}`);
-    }
-
-    return newToken.access_token;
   }
 
-  const { token_data, created_at } = token;
-  const accesToken = token_data.acces_token;
-  const expiresIn = token_data.expires_in;
-
-  const createdAt = new Date(created_at).getTime();
-  const expiresAt = createdAt + expiresIn * 1000;
-  const now = Date.now();
-
-  if (now > expiresAt) {
-    console.log("Token is valid");
-    return accesToken;
-  }
-
+  //Token is not still valid so get a new one
   const newToken = await fetchToken();
-  if (newToken instanceof Response) {
-    return newToken;
-  }
 
-  const { updateError } = await supabase
+  if (newToken === null) {
+    return null;
+  }
+  console.log(newToken);
+
+  //Upsert the new token
+  const { error: upsertError } = await supabase
     .from("token_cache")
-    .update({ token: newToken })
-    .eq("token_name", "osu_api_token");
+    .upsert({
+      token_name: "osu_api_token",
+      token: newToken,
+    });
 
-  if (updateError) {
-    console.error(`fuck: ${updateError}`);
+  if (upsertError) {
+    console.error(`Upsert error: ${upsertError.message}`);
+    return null;
   }
 
+  //Finally return it
   return newToken.access_token;
 }
 
 async function fetchToken() {
+  //Fetching new token
   let tokenResponse: Response;
   try {
     tokenResponse = await fetch("http://osu.ppy.sh/oauth/token", {
@@ -81,24 +102,21 @@ async function fetchToken() {
       }),
     });
 
+    //If the response has some problems log it and return null
     if (!tokenResponse.ok) {
       console.error(
         `HTTP error: ${tokenResponse.status} - ${tokenResponse.statusText}. In token fetch`,
       );
-      return new Response("Failed to fetch api token", {
-        headers: { ...corsHeaders },
-        status: tokenResponse.status,
-      });
+      return null;
     }
 
-    const tokenData = await tokenResponse.json();
-
-    return tokenData;
+    //Response was fine return the new token
+    const token = await tokenResponse.json();
+    return token;
   } catch (error) {
+    //Likey a more language related error like parsing ect since HTTP errors
+    //are already being checked for
     console.error("Error fetching API token:", error);
-    return new Response("Error fetching API token", {
-      headers: { ...corsHeaders },
-      status: 500,
-    });
+    return null;
   }
 }
