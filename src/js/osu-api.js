@@ -1,9 +1,5 @@
-//TODO: figure out a way around inconsistatn behavior. The likly culprit is
-//the osu API
-
 export async function recentPlays(userID) {
-  const url = "http://127.0.0.1:54321/functions/v1/osu-api";
-
+  const url = "https://jpxdwuzsxkcerplprlwv.supabase.co/functions/v1/osu-api";
   const headers = {
     "Content-Type": "application/json",
   };

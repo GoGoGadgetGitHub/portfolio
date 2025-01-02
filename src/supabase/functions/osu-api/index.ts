@@ -23,6 +23,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  //TODO:Every now and then the recent plays fetch fails. I might need to implemnet a retry tactic
+
   const plays = await recentPlays(userID, token);
   if (token === null) {
     return new Response("Failed to fetch plays", {

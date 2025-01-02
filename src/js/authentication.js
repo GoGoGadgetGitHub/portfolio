@@ -13,10 +13,12 @@ task. So i believe in this case it's justified
 */
 
 const login = document.getElementById("login");
+const signup = document.getElementById("signup");
 const message = document.getElementById("message");
 
 if (login) {
-  message.textContent = "If you do not have an account one will be made for you once you have provided your email."
+  message.textContent =
+    "If you do not have an account one will be made for you once you have provided your email.";
   login.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -24,78 +26,85 @@ if (login) {
 
     var { data, error } = await supabase.auth.signInWithOtp({
       email,
-    })
+    });
 
     if (error) {
       message.textContent = error.message;
     } else {
       //window.location.href = "./index.html";
-      document.getElementById("submit").classList.add("hide")
-      message.textContent = "Check your email and click the link to login. \n You can close this tab."
+      document.getElementById("submit").classList.add("hide");
+      message.textContent =
+        "Check your email and click the link to login. \n You can close this tab.";
     }
-  })
+  });
 }
 
-/*if (signup) {
-  document.getElementById("signup").addEventListener("submit", async (event) => {
-    event.preventDefault();
+if (signup) {
+  document.getElementById("signup").addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
 
-    const email = document.getElementById("email").value;
-    const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const username = document.getElementById("username").value;
 
-    try {
+      try {
+        //this will create a user if one does not exist
+        const { data: magicData, error: magicError } = await supabase.auth
+          .signInWithOtp({ email });
 
-      //this will create a user if one does not exist
-      var { data, error } = await supabase.auth.signInWithOtp({
-        email,
-      })
+        //there was an error with user login/signup
+        if (magicError) {
+          console.log(magicError.message);
+          return;
+        }
 
-      //there was an error with user login/signup
-      if (error) {
-        console.log(error.message)
-        return
+        //the rest of the code needs to run server side because it needs to
+        //have access to the service role so this is where i hand off to the
+        //edge functions
+        const { data: edgeData, error: edgeError } = await supabase.functions
+          .invoke("new-user", {
+            body: { username, email },
+          });
+
+        if (edgeError) {
+          console.error(
+            `error invoking new user edge functions: ${edgeError.message}`,
+          );
+        }
+      } catch (err) {
+        message.textContent = "some big bad scary error";
+        console.error(err);
       }
-
-      var { data: { user }, userError } = await supabase.auth.getUser()
-
-      console.log(user)
-
-      //if the user did not exist prior to signInWithOtp call they would now
-      //have a username of null deu to the trigger on the auth.user table
-      //if this is the case their usename should be updated with the one they
-      //entered, othewise they will just be logged in an their username will 
-      //stay the same
-
-      if (userExists()) {
-        console.log("this is where you redirect existing user")
-        //window.location.href = '../index.html'
-        return
-      }
-
-      if (!updateUsename(username)) {
-        console.log("error updating username")
-        return
-      }
-
-      //the user should be logged in so they can just go to the home page
-      console.log("this is where you redirect the new user")
-      //window.location.href = '../index.html'
-
-    } catch (err) {
-      message.textContent = "some big bad scary error"
-      console.error(err)
-    }
-  })
+    },
+  );
 }
 
+async function newUser(username, email) {
+  //This is the long way of calling an edge function
+  /*
+  const url = "https://jpxdwuzsxkcerplprlwv.supabase.co/functions/v1/new-user";
+  const headers = {
+    "Content-Type": "application/json",
+  };
 
-async function updateUsename(username) {
-  const { error } = await supabase
-    .from('profiles')
-    .insert({ username: username })
-  if (error) {
-    console.log(error.message)
-    return false
+  let response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ username }),
+    });
+    if (!response.ok) {
+      console.log(
+        `HTTP error: ${response.status} - ${response.statusText}. In main call`,
+      );
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("some wacky error:", error);
   }
-  return true
-}*/
+  return true;
+  */
+}

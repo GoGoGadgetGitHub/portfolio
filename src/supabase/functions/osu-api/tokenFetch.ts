@@ -7,6 +7,10 @@ export async function getToken() {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const supabase = createClient(supabaseUrl, serviceKey);
 
+  if (supabase) {
+    console.log("Client Created sucsessfully");
+  }
+
   //Get token from database
   /*
   const tableName = "token_cahe";
@@ -50,8 +54,6 @@ export async function getToken() {
     const expiresAt = createdAt + expires_in * 1000;
     const now = Date.now();
 
-    console.log(expires_in, createdAt, expiresAt, now);
-
     //Token is still valid, return it
     if (now < expiresAt) {
       console.log("Token is valid");
@@ -65,7 +67,6 @@ export async function getToken() {
   if (newToken === null) {
     return null;
   }
-  console.log(newToken);
 
   //Upsert the new token
   const { error: upsertError } = await supabase
