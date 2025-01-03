@@ -17,12 +17,12 @@ const signup = document.getElementById("signup");
 const message = document.getElementById("message");
 
 if (login) {
-  message.textContent =
-    "If you do not have an account one will be made for you once you have provided your email.";
   login.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const email = document.getElementById("email").value;
+
+    //TODO: check if user exists using email and profiles tabel
 
     var { data, error } = await supabase.auth.signInWithOtp({
       email,

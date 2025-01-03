@@ -22,13 +22,55 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, serviceKey);
 
   const { username, email } = await req.json();
-  console.log(username, email);
-  const data = {
-    message: `Hello ${username}, your email adress is ${email}!`,
-  };
+
+  //Get the id of the user with thier email address
+  const { data: id, error: IdError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .single();
+
+  if (IdError) {
+    console.error(`Problem selecting id from users tabel: ${IdError.message}`);
+    // Respond with an error message
+  }
+
+  console.log(id);
+
+  //check if the username is null
+  const { data: name, error: checkError } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", id.id)
+    .single();
+
+  if (checkError) {
+    console.error(
+      `Problem cheking username: ${checkError.name} - ${checkError.message}`,
+    );
+  }
+
+  console.log(name);
+
+  //Some check for null
+  if (name.username !== null) {
+    //Respong with a message stating that the username is already there
+    //This would mean the account exists
+  }
+
+  //If the username is null then this is a new user and we need to give the username
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ username: username })
+    .eq("id", id.id);
+
+  if (updateError) {
+    console.error(`Problem updating username: ${updateError.message}`);
+    // Respond with an error message
+  }
 
   return new Response(
-    JSON.stringify(data),
+    "some data",
     {
       headers: {
         "Content-Type": "application/json",
