@@ -2,6 +2,7 @@ import { corsHeaders } from "../_shared/cors.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { recentPlays } from "./recentPlays.ts";
 import { getToken } from "./tokenFetch.ts";
+import { addScores } from "./addScores.ts";
 
 Deno.serve(async (req: Request) => {
   //CORS Preflight
@@ -26,7 +27,15 @@ Deno.serve(async (req: Request) => {
   //TODO:Every now and then the recent plays fetch fails. I might need to implemnet a retry tactic
 
   const plays = await recentPlays(userID, token);
-  if (token === null) {
+  if (plays === null) {
+    return new Response("Failed to fetch plays", {
+      headers: { ...corsHeaders },
+      status: 500,
+    });
+  }
+
+  const added = await addScores(plays, userID);
+  if (!added) {
     return new Response("Failed to fetch plays", {
       headers: { ...corsHeaders },
       status: 500,

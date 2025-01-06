@@ -1,16 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { getClient } from "../_shared/supabase.ts";
 
 export async function getToken() {
-  //Create supabase client
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const supabase = createClient(supabaseUrl, serviceKey);
-
-  if (supabase) {
-    console.log("Client Created sucsessfully");
-  }
-
   //Get token from database
   /*
   const tableName = "token_cahe";
@@ -32,6 +23,11 @@ export async function getToken() {
   const { token, expires_in } = await response.json();
   console.log(token, expires_in);
   */
+  const supabase = getClient();
+  if (supabase === null) {
+    console.error("Supabase client could not be made");
+    return null;
+  }
 
   const { data: token, error: selectError } = await supabase
     .from("token_cache")
