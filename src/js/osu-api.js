@@ -24,7 +24,7 @@ export async function recentPlays(userID) {
 }
 
 (async () => {
-  const plays = await recentPlays("3982856");
+  const plays = await recentPlays("15417745");
   if (plays) {
     console.log(plays);
   }

@@ -4,8 +4,9 @@ export async function addScores(scores, user_id) {
   const supabase = getClient();
   if (supabase === null) {
     console.error("Could not create supabase client");
-    return null;
+    return false;
   }
+
   // get the last score form this user
   console.log(user_id);
   let { data: lastScore, error: lastScoreError } = await supabase.rpc(
@@ -15,32 +16,37 @@ export async function addScores(scores, user_id) {
 
   if (lastScoreError) {
     console.error(lastScoreError.message);
-    return null;
+    return false;
   }
 
   // if the user has no previos score in the table then we'll start with an initial session id 0
-  let session_id = lastScore.session_id;
-  if (lastScore.osu_profile_id === null) {
-    console.log("No scores exist for this user, initialising session id to 0");
-    session_id = 0;
-  }
+  const hadScores = lastScore.osu_profile_id !== null;
+  let session_id = hadScores ? lastScore.session_id : 0;
 
   let count = 0;
   let prevScore;
-  let i;
-  console.log(lastScore);
-  for (i in scores) {
+
+  for (const i in scores) {
     const score = scores[i];
-    console.log(score, prevScore);
-    //compare last score with socre, if they are the same then exit
+
     const timeStampNext = new Date(score.created_at);
+
+    //on the first itteration of the loop prev score will be undefined
     const timeStamPrev = prevScore ? new Date(prevScore.created_at) : null;
-    const timeStampLast = new Date(lastScore.created_at);
+
+    //if the were no scores logged for this user the time stamp of the last score will be the time stamp of the next score
+    const timeStampLast = hadScores
+      ? new Date(lastScore.created_at)
+      : timeStampNext;
 
     console.log(`result of comparison between last score and next score:
       ${timeStampNext.getTime() === timeStampLast.getTime()}`);
 
-    if (timeStampNext.getTime() === timeStampLast.getTime()) {
+    //We reached the end of new scores if the user had previos scores and the last know previos score's timestamp is equal
+    //to the score we want to add
+    const finished = (timeStampNext.getTime() === timeStampLast.getTime()) &&
+      hadScores;
+    if (finished) {
       console.log(`reached end of new scores. ${count} added`);
       break;
     }
@@ -48,9 +54,12 @@ export async function addScores(scores, user_id) {
     const timeDiffLast = timeStampCompare(timeStampLast, timeStampNext);
     const timeDiffPrev = timeStampCompare(timeStamPrev, timeStampNext);
 
+    //If this is the first itteration of the the loop the time diffrence between scores will be the diffrence
+    //between the last score i have of that user in the database and the next score i want to add
+    //other wise it will be the time diffrence between the pevious score added and the next one
     const timeDiffMin = prevScore ? timeDiffPrev : timeDiffLast;
-    console.log(timeDiffMin);
 
+    // for a time diffrence more than 1 hour the session ID is incremented
     session_id = (timeDiffMin > 60) ? session_id += 1 : session_id;
 
     //add record
@@ -63,19 +72,21 @@ export async function addScores(scores, user_id) {
       console.error(
         `Error when adding scores to score table:${insertError.message}`,
       );
-      return null;
+      return false;
     }
     count += 1;
     prevScore = score;
   }
+  return true;
+}
 
-  function timeStampCompare(last: Date, next: Date) {
-    if (last === null) {
-      return;
-    }
-    const differenceMilli = next - last;
-    const differenceSeconds = differenceMilli / 1000;
-    const differenceMinutes = differenceSeconds / 60;
-
-    return differenceMinutes;
+function timeStampCompare(prev: Date, next: Date) {
+  if (prev === null) {
+    return;
   }
+  const differenceMilli = next - prev;
+  const differenceSeconds = differenceMilli / 1000;
+  const differenceMinutes = differenceSeconds / 60;
+
+  return Math.abs(Math.round(differenceMinutes));
+}

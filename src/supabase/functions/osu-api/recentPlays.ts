@@ -7,7 +7,7 @@ export async function recentPlays(userID: string, token: string) {
 
   const params = {
     "include_fails": "1",
-    "limit": "9999",
+    "limit": "999",
   };
 
   Object.keys(params).forEach((key) =>

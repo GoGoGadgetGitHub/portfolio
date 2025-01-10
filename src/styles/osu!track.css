@@ -1,0 +1,82 @@
+@import './styles.css';
+
+.osu-username {
+  color: var(--foreground);
+  height: 5%;
+  margin: 5% auto;
+  width: max-content;
+  text-align: center;
+}
+
+.osu-username input {
+  display: block;
+  border-radius: 15px;
+  background: var(--foreground);
+  color: var(--background);
+  border: 2px solid var(--foreground);
+  font-size: 1rem;
+}
+
+.osu-username input:focus {
+  outline: none;
+  border: none;
+  border: 2px solid var(--foreground);
+}
+
+.table {
+  width: 85%;
+  max-height: 20em;
+  margin: 7% auto;
+  overflow-y: auto;
+  border-radius: 15px;
+  border: 1px solid var(--foreground)
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  border: 0 solid transparent;
+}
+
+tbody td {
+  border: 0 solid transparent;
+  border-bottom: 1px solid var(--foreground);
+  border-radius: 15px;
+}
+
+.first {
+  border-radius: 12px 0 0 0;
+}
+
+.last {
+  border-radius: 0 12px 0 0;
+}
+
+table {
+  border-radius: 15px;
+  border-width: 0;
+  border-spacing: 0;
+  width: 100%;
+  height: 100%;
+}
+
+thead {
+  border-radius: 15px;
+}
+
+th {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+td {
+  color: var(--foreground);
+  text-align: center;
+}
+
+/* hide scrolling behind the header */
+
+th,
+td {
+  padding: 5px;
+}

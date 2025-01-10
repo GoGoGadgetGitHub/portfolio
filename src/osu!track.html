@@ -6,9 +6,9 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>To Do List</title>
+  <title>Osu! Track!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./styles/styles.css" />
+  <link rel="stylesheet" href="./styles/osu!track.css" />
 </head>
 
 <body>
@@ -22,9 +22,37 @@
     </ul>
   </div>
   <main>
-
+    <div class="osu-username">
+      <label>Enter osu! Username</label>
+      <input />
+    </div>
+    <div class="table">
+      <table>
+        <!-- Table head content -->
+        <thead>
+          <tr>
+            <th class="first">Song Name</th>
+            <th>*</th>
+            <th>Acc</th>
+            <th>Hits</th>
+            <th>Grade</th>
+            <th class="last">PP</th>
+          </tr>
+        </thead>
+        <!-- Table body content -->
+        <tbody>
+          <tr>
+            <td>Some really fucking long song name holy shit</td>
+            <td>6.5</td>
+            <td>99.2%</td>
+            <td>4000/2/1/0</td>
+            <td>S</td>
+            <td>29000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 </body>
-<script src="./js/osu-api.js" type="module" />
 
 </html>

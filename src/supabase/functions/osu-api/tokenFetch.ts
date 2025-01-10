@@ -2,27 +2,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { getClient } from "../_shared/supabase.ts";
 
 export async function getToken() {
-  //Get token from database
-  /*
-  const tableName = "token_cahe";
-  const params = new URLSearchParams({ token_name: "osu_api_token" });
-  const url = `${supabaseUrl}/rest/v1/${tableName}?${params}`;
-  console.log(url);
-  const response = await fetch(url, {
-    headers: {
-      apikey: serviceKey,
-      Authorization: `Bearer ${serviceKey}`,
-      Accept: "application/vdn.pgrst.object+json",
-    },
-  });
-
-  if (!response.ok) {
-    console.error("api be bugging");
-  }
-
-  const { token, expires_in } = await response.json();
-  console.log(token, expires_in);
-  */
   const supabase = getClient();
   if (supabase === null) {
     console.error("Supabase client could not be made");
