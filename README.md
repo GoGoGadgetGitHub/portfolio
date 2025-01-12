@@ -1,4 +1,4 @@
-Please not this is still a work in progress. 
+Please note this is still a work in progress. 
 
 My last deployment was a while ago and the osu!Track Project is still being worked on.
 
