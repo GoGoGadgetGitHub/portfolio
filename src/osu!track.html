@@ -9,6 +9,7 @@
   <title>Osu! Track!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./styles/osu!track.css" />
+  <link rel="stylesheet" href="../node_modules/datatables.net-dt/css/dataTables.dataTables.css" />
 </head>
 
 <body>
@@ -23,36 +24,27 @@
   </div>
   <main>
     <div class="osu-username">
-      <label>Enter osu! Username</label>
+      <label>Enter osu! Username:</label>
       <input />
     </div>
-    <div class="table">
-      <table>
-        <!-- Table head content -->
-        <thead>
-          <tr>
-            <th class="first">Song Name</th>
-            <th>*</th>
-            <th>Acc</th>
-            <th>Hits</th>
-            <th>Grade</th>
-            <th class="last">PP</th>
-          </tr>
-        </thead>
-        <!-- Table body content -->
-        <tbody>
-          <tr>
-            <td>Some really fucking long song name holy shit</td>
-            <td>6.5</td>
-            <td>99.2%</td>
-            <td>4000/2/1/0</td>
-            <td>S</td>
-            <td>29000</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table id="myTable" class="display">
+      <!-- Table head content -->
+      <thead>
+        <tr>
+          <th class="first">Song Name</th>
+          <th>*</th>
+          <th>Acc</th>
+          <th>Hits</th>
+          <th>Grade</th>
+          <th class="last">PP</th>
+        </tr>
+      </thead>
+      <!-- Table body content -->
+      <tbody id="scores-table">
+      </tbody>
+    </table>
   </main>
 </body>
+<script src="./js/osu!Track.js" type="module"> </script>
 
 </html>
