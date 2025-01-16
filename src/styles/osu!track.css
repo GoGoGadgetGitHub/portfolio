@@ -25,25 +25,29 @@
 
 #myTable_wrapper {
   max-width: 95%;
+  min-width: 95%;
   margin: 0 auto;
 }
 
+.rank-image {
+  height: 2em;
+}
+
+td {
+  text-align: center;
+}
 
 table {
   color: var(--foreground);
 }
 
 thead {
-  background: var(--foreground);
   color: var(--background);
 }
 
-th.first {
-  border-radius: 12px 0 0 0;
-}
-
-th.last {
-  border-radius: 0 12px 0 0;
+.table-head th {
+  background: var(--foreground);
+  border-radius: 15px;
 }
 
 div.dt-search {
@@ -60,4 +64,8 @@ div.dt-container .dt-search input {
   background-color: var(--foreground);
   border-radius: 15px;
   margin-left: 1%;
+}
+
+div#myTable_info.dt-info {
+  color: var(--foreground);
 }
