@@ -9,35 +9,42 @@ import s_rank from "../assets/s-rank.png";
 import x_rank from "../assets/x-rank.png";
 import sh_rank from "../assets/sh-rank.png";
 import xh_rank from "../assets/xh-rank.png";
+import DataTable from "datatables.net-dt";
 
-(async () => {
-  const plays = await recentPlays("11628790");
+const track = document.getElementById("track");
+
+var table = new DataTable("#myTable", {
+  paging: false,
+  scrollY: 400,
+});
+
+track.addEventListener("click", async () => {
+  table.clear().draw();
+  const osuUsername = document.getElementById("osu-username-input").value;
+  const plays = await recentPlays(osuUsername);
   if (plays) {
     console.log(plays);
   }
-  await populateScores("11628790");
-  $(document).ready(() => {
-    $("#myTable").DataTable({
-      paging: false,
-      scrollY: 400,
-    });
-    console.log(a_rank);
-  });
-})();
+  await populateScores(osuUsername);
+});
 
-async function populateScores(osu_profile_id) {
+//TODO: rewrite this to use the datatables API
+//construct an object list containing entries and pass those to rows.add
+async function populateScores(osuUsername) {
   const { data: scores, error: selectError } = await supabase
     .from("osu_scores")
-    .select("score")
-    .eq("osu_profile_id", osu_profile_id);
+    .select("score, osu_profiles!inner(osu_username)")
+    .eq("osu_profiles.osu_username", osuUsername);
+
+  console.log(scores);
 
   if (selectError) {
     console.error(
       `Error retrieving scores from database: ${selectError.message}`,
     );
   }
-  const tableBody = document.getElementById("scores-table");
 
+  const rows = [];
   for (const i in scores) {
     const songName = document.createElement("td");
     const sr = document.createElement("td");
@@ -125,11 +132,13 @@ async function populateScores(osu_profile_id) {
     }`;
     tableRow.appendChild(set);
 
-    tableBody.appendChild(tableRow);
+    rows.push(tableRow);
   }
+
+  table.rows.add(rows).draw();
 }
 
-export async function recentPlays(userID) {
+export async function recentPlays(osuUsername) {
   const url = "https://jpxdwuzsxkcerplprlwv.supabase.co/functions/v1/osu-api";
   const headers = {
     "Content-Type": "application/json",
@@ -140,7 +149,7 @@ export async function recentPlays(userID) {
     response = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify({ userID }),
+      body: JSON.stringify({ osuUsername }),
     });
     if (!response.ok) {
       console.log(

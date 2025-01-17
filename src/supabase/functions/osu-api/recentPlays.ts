@@ -1,8 +1,8 @@
 import { corsHeaders } from "../_shared/cors.ts";
 
-export async function recentPlays(userID: string, token: string) {
+export async function recentPlays(osu_user_id: string, token: string) {
   const urlApi = new URL(
-    `https://osu.ppy.sh/api/v2/users/${userID}/scores/recent`,
+    `https://osu.ppy.sh/api/v2/users/${osu_user_id}/scores/recent`,
   );
 
   const params = {

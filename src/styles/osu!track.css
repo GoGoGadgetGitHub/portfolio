@@ -17,6 +17,21 @@
   font-size: 1rem;
 }
 
+.osu-username button {
+  display: inline;
+  border: 1px solid var(--foreground);
+  color: var(--background);
+  background: var(--foreground);
+  border-radius: 15px;
+  font-size: 1rem;
+  margin: 3% auto;
+}
+
+.osu-username button:hover {
+  background: var(--color4);
+  border-color: var(--color4);
+}
+
 .osu-username input:focus {
   outline: none;
   border: none;

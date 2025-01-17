@@ -3,19 +3,21 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { recentPlays } from "./recentPlays.ts";
 import { getToken } from "./tokenFetch.ts";
 import { addScores } from "./addScores.ts";
+import { getUserID } from "./getUserID.ts";
 
 Deno.serve(async (req: Request) => {
   //CORS Preflight
   if (req.method === "OPTIONS") {
     console.log("Preflight...");
-    console.log(corsHeaders);
     return new Response("ok", {
       headers: { ...corsHeaders },
     });
   }
 
-  const { userID } = await req.json();
+  const { osuUsername } = await req.json();
+  console.log(`The username passed is: ${osuUsername}`);
 
+  console.log(`Getting token`);
   const token = await getToken();
   if (token === null) {
     return new Response("Failed to fetch token", {
@@ -24,9 +26,17 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  //TODO:Every now and then the recent plays fetch fails. I might need to implemnet a retry tactic
+  console.log("Getting osu user id from database.");
+  const osu_user_id = await getUserID(osuUsername, token);
+  if (osu_user_id == null) {
+    return new Response("Could not find user id, username might not exist!", {
+      headers: { ...corsHeaders },
+      status: 500,
+    });
+  }
 
-  const plays = await recentPlays(userID, token);
+  console.log("Fetching recent plays.");
+  const plays = await recentPlays(osu_user_id, token);
   if (plays === null) {
     return new Response("Failed to fetch plays", {
       headers: { ...corsHeaders },
@@ -34,9 +44,10 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const added = await addScores(plays, userID);
+  console.log("Adding scores to database.");
+  const added = await addScores(plays, osu_user_id);
   if (!added) {
-    return new Response("Failed to fetch plays", {
+    return new Response("Failed to add scores", {
       headers: { ...corsHeaders },
       status: 500,
     });

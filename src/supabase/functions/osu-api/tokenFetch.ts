@@ -22,7 +22,6 @@ export async function getToken() {
 
   //Checking if token is still valid
   if (token) {
-    console.log("token found");
     const { access_token, expires_in } = token.token;
 
     const createdAt = new Date(token.created_at).getTime();
@@ -37,6 +36,7 @@ export async function getToken() {
   }
 
   //Token is not still valid so get a new one
+  console.log("Token is no longer valid, fetching a new one.");
   const newToken = await fetchToken();
 
   if (newToken === null) {
@@ -44,6 +44,7 @@ export async function getToken() {
   }
 
   //Upsert the new token
+  console.log("Updating token.");
   const { error: upsertError } = await supabase
     .from("token_cache")
     .upsert({

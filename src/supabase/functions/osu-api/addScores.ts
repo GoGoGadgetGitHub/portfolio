@@ -1,17 +1,18 @@
 import { getClient } from "../_shared/supabase.ts";
 
-export async function addScores(scores, user_id) {
+export async function addScores(scores, osu_user_id) {
   const supabase = getClient();
   if (supabase === null) {
     console.error("Could not create supabase client");
     return false;
   }
 
+  console.log(`Adding scores for: ${osu_user_id}`);
+
   // get the last score form this user
-  console.log(user_id);
   let { data: lastScore, error: lastScoreError } = await supabase.rpc(
     "get_latest_score",
-    { p_osu_profile_id: user_id },
+    { p_osu_user_id: osu_user_id },
   );
 
   if (lastScoreError) {
@@ -20,7 +21,10 @@ export async function addScores(scores, user_id) {
   }
 
   // if the user has no previos score in the table then we'll start with an initial session id 0
-  const hadScores = lastScore.osu_profile_id !== null;
+  const hadScores = lastScore.osu_user_id !== null;
+
+  console.log(`User had scores saved: ${hadScores}`);
+
   let session_id = hadScores ? lastScore.session_id : 0;
 
   let count = 0;
@@ -38,9 +42,6 @@ export async function addScores(scores, user_id) {
     const timeStampLast = hadScores
       ? new Date(lastScore.created_at)
       : timeStampNext;
-
-    console.log(`result of comparison between last score and next score:
-      ${timeStampNext.getTime() === timeStampLast.getTime()}`);
 
     //We reached the end of new scores if the user had previos scores and the last know previos score's timestamp is equal
     //to the score we want to add
@@ -66,7 +67,7 @@ export async function addScores(scores, user_id) {
     const created_at = score.created_at;
     const { error: insertError } = await supabase
       .from("osu_scores")
-      .insert({ osu_profile_id: user_id, created_at, score, session_id });
+      .insert({ osu_user_id, created_at, score, session_id });
 
     if (insertError) {
       console.error(
@@ -75,6 +76,7 @@ export async function addScores(scores, user_id) {
       return false;
     }
     count += 1;
+    console.log(`Score added!: ${score.beatmapset.title}`);
     prevScore = score;
   }
   return true;
