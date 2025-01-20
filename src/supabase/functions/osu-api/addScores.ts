@@ -38,13 +38,14 @@ export async function addScores(scores, osu_user_id) {
     //on the first itteration of the loop prev score will be undefined
     const timeStamPrev = prevScore ? new Date(prevScore.created_at) : null;
 
-    //if the were no scores logged for this user the time stamp of the last score will be the time stamp of the next score
+    //if there were no scores logged for this user the time stamp of the last score
+    //will be the time stamp of the next score
     const timeStampLast = hadScores
       ? new Date(lastScore.created_at)
       : timeStampNext;
 
-    //We reached the end of new scores if the user had previos scores and the last know previos score's timestamp is equal
-    //to the score we want to add
+    //We reached the end of new scores if the user had previos scores and the last
+    //know previos score's timestamp is equal to the score we want to add
     const finished = (timeStampNext.getTime() === timeStampLast.getTime()) &&
       hadScores;
     if (finished) {

@@ -1,6 +1,6 @@
 import { supabase } from "./supabaseClient.js";
-import $ from "jquery";
 import "datatables.net";
+//TODO: find better rank icons
 import a_rank from "../assets/a-rank.png";
 import b_rank from "../assets/b-rank.png";
 import c_rank from "../assets/c-rank.png";
@@ -12,29 +12,40 @@ import xh_rank from "../assets/xh-rank.png";
 import DataTable from "datatables.net-dt";
 
 const track = document.getElementById("track");
+const message = document.getElementById("message");
 
-var table = new DataTable("#myTable", {
+const table = new DataTable("#myTable", {
   paging: false,
+
   scrollY: 400,
 });
 
 track.addEventListener("click", async () => {
   table.clear().draw();
+  message.classList.add("hide");
   const osuUsername = document.getElementById("osu-username-input").value;
-  const plays = await recentPlays(osuUsername);
-  if (plays) {
-    console.log(plays);
+  const { plays, osu_user_id, error } = await recentPlays(osuUsername);
+
+  if (error === "id-fail") {
+    message.classList.remove("hide");
+    message.textContent = "No such user!";
+    return;
   }
-  await populateScores(osuUsername);
+  if (error) {
+    message.classList.remove("hide");
+    message = "Something went wrong :(";
+    return;
+  }
+  console.log(plays);
+
+  await populateScores(osu_user_id);
 });
 
-//TODO: rewrite this to use the datatables API
-//construct an object list containing entries and pass those to rows.add
-async function populateScores(osuUsername) {
+async function populateScores(osu_user_id) {
   const { data: scores, error: selectError } = await supabase
     .from("osu_scores")
-    .select("score, osu_profiles!inner(osu_username)")
-    .eq("osu_profiles.osu_username", osuUsername);
+    .select("score")
+    .eq("osu_user_id", osu_user_id);
 
   console.log(scores);
 
@@ -76,6 +87,7 @@ async function populateScores(osuUsername) {
 
     const rankImage = document.createElement("img");
 
+    let failPoint;
     switch (score.rank) {
       case "XH":
         grade.innerHTML = '<span class="hide">0</span>';
@@ -111,10 +123,15 @@ async function populateScores(osuUsername) {
         break;
       case "F":
         grade.innerHTML = '<span class="hide">8</span>';
-        rankImage.src = d_rank;
+        failPoint = calculateFailPoint(
+          stats,
+          score.beatmap.count_circles,
+          score.beatmap.count_sliders,
+          score.beatmap.count_spinners,
+        );
+        grade.textContent = `Failed at: ${Math.round(failPoint * 100) / 100}%`;
         break;
     }
-
     rankImage.classList.add("rank-image");
 
     grade.appendChild(rankImage);
@@ -127,9 +144,8 @@ async function populateScores(osuUsername) {
     }
     tableRow.appendChild(pp);
 
-    set.innerHTML = `<span class="hide">${score.created_at}</span>${
-      formatRelativeTime(score.created_at)
-    }`;
+    set.innerHTML = `<span class="hide">${score.created_at}</span>${formatRelativeTime(score.created_at)
+      }`;
     tableRow.appendChild(set);
 
     rows.push(tableRow);
@@ -138,6 +154,18 @@ async function populateScores(osuUsername) {
   table.rows.add(rows).draw();
 }
 
+function calculateFailPoint(stats, circles, sliders, spinners) {
+  const totalObjects = circles + sliders + spinners;
+  const totalHits = stats.count_300 + stats.count_100 + stats.count_50 +
+    stats.count_miss;
+  console.log(totalObjects, totalHits);
+  return ((totalHits / totalObjects) * 100);
+}
+
+//Uses the edge function to interact with the osu API
+//Adds a new osu profile to the database if it does not exist
+//Adds new plays for existing users and new users
+//Returns a list of recent plays and the osu user id of the username specified
 export async function recentPlays(osuUsername) {
   const url = "https://jpxdwuzsxkcerplprlwv.supabase.co/functions/v1/osu-api";
   const headers = {

@@ -1,12 +1,5 @@
 import { getClient } from "../_shared/supabase.ts";
 import { corsHeaders } from "../_shared/cors.ts";
-//  fetch id
-//  if fail
-//    make api call to get user data
-//    add username and id
-//    return id
-//  else
-//    return id from table
 
 export async function getUserID(osuUsername: string, token: string) {
   const supabase = getClient();
@@ -37,11 +30,14 @@ export async function getUserID(osuUsername: string, token: string) {
   }
   console.log("No ID found, fetching user data from osu API");
   const userData = await getUserData(osuUsername, token);
+  if (userData === null) {
+    return null;
+  }
   await addOsuUser(userData, supabase);
   return userData.id;
 }
 
-//adds an osu profile to the profiles table and returns their user id
+//adds an osu profile to the profiles table
 async function addOsuUser(userData, supabase) {
   const { data, error: insertError } = await supabase
     .from("osu_profiles")
@@ -88,19 +84,13 @@ export async function getUserData(osuUsername: string, token: string) {
       console.error(
         `HTTP error: ${response.status} - ${response.statusText}`,
       );
-      return new Response("Failed to fetch user", {
-        headers: { ...corsHeaders },
-        status: response.status,
-      });
+      return null;
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
     console.log("Error fetching user id:", error);
-    return new Response("Error user id", {
-      headers: { ...corsHeaders },
-      status: 500,
-    });
+    return null;
   }
 }

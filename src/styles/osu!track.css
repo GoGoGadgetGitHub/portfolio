@@ -44,6 +44,11 @@
   margin: 0 auto;
 }
 
+#message {
+  margin: 0 auto;
+  color: var(--color3);
+}
+
 .rank-image {
   height: 2em;
 }

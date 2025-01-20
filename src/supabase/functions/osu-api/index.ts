@@ -14,50 +14,62 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  //TODO: Handel user does not exist
+
   const { osuUsername } = await req.json();
   console.log(`The username passed is: ${osuUsername}`);
+
+  const response = { plays: null, osu_user_id: null, error: null };
 
   console.log(`Getting token`);
   const token = await getToken();
   if (token === null) {
-    return new Response("Failed to fetch token", {
+    response.error = "token-fail";
+    return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders },
       status: 500,
     });
   }
 
   console.log("Getting osu user id from database.");
-  const osu_user_id = await getUserID(osuUsername, token);
-  if (osu_user_id == null) {
-    return new Response("Could not find user id, username might not exist!", {
+  response.osu_user_id = await getUserID(osuUsername, token);
+  console.log(response.osu_user_id);
+  if (response.osu_user_id === null) {
+    response.error = "id-fail";
+    return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders },
       status: 500,
     });
   }
 
   console.log("Fetching recent plays.");
-  const plays = await recentPlays(osu_user_id, token);
-  if (plays === null) {
-    return new Response("Failed to fetch plays", {
+  response.plays = await recentPlays(response.osu_user_id, token);
+  if (response.plays === null) {
+    response.error = "plays-fail";
+    return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders },
       status: 500,
     });
   }
 
   console.log("Adding scores to database.");
-  const added = await addScores(plays, osu_user_id);
+  const added = await addScores(response.plays, response.osu_user_id);
   if (!added) {
-    return new Response("Failed to add scores", {
+    response.error = "add-scores-fail";
+    return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders },
       status: 500,
     });
   }
 
-  return new Response(JSON.stringify(plays), {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "application/json",
+  return new Response(
+    JSON.stringify(response),
+    {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      },
+      status: 200,
     },
-    status: 200,
-  });
+  );
 });
