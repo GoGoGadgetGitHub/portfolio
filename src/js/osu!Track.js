@@ -1,14 +1,15 @@
 import { supabase } from "./supabaseClient.js";
 import "datatables.net";
 //TODO: find better rank icons
-import a_rank from "../assets/a-rank.png";
-import b_rank from "../assets/b-rank.png";
-import c_rank from "../assets/c-rank.png";
-import d_rank from "../assets/d-rank.png";
-import s_rank from "../assets/s-rank.png";
-import x_rank from "../assets/x-rank.png";
-import sh_rank from "../assets/sh-rank.png";
-import xh_rank from "../assets/xh-rank.png";
+import a_rank from "../assets/a-rank.svg";
+import b_rank from "../assets/b-rank.svg";
+import c_rank from "../assets/c-rank.svg";
+import d_rank from "../assets/d-rank.svg";
+import f_rank from "../assets/f-rank.svg";
+import s_rank from "../assets/s-rank.svg";
+import x_rank from "../assets/x-rank.svg";
+import sh_rank from "../assets/sh-rank.svg";
+import xh_rank from "../assets/xh-rank.svg";
 import DataTable from "datatables.net-dt";
 
 const track = document.getElementById("track");
@@ -86,11 +87,12 @@ async function populateScores(osu_user_id) {
     grade.innerHTML = `<span class="hide">${score.rank}</span>`;
 
     const rankImage = document.createElement("img");
-
+    const failPercent = document.createElement("p");
+    failPercent.classList.add("fail-percent");
     let failPoint;
     switch (score.rank) {
       case "XH":
-        grade.innerHTML = '<span class="hide">0</span>';
+        image.innerHTML = '<span class="hide">0</span>';
         rankImage.src = xh_rank;
         break;
       case "X":
@@ -123,15 +125,18 @@ async function populateScores(osu_user_id) {
         break;
       case "F":
         grade.innerHTML = '<span class="hide">8</span>';
+        rankImage.src = f_rank;
         failPoint = calculateFailPoint(
           stats,
           score.beatmap.count_circles,
           score.beatmap.count_sliders,
           score.beatmap.count_spinners,
         );
-        grade.textContent = `Failed at: ${Math.round(failPoint * 100) / 100}%`;
+        failPercent.textContent = `${Math.round(failPoint * 100) / 100}%`;
+        grade.appendChild(failPercent);
         break;
     }
+    grade.classList.add("grade");
     rankImage.classList.add("rank-image");
 
     grade.appendChild(rankImage);
@@ -144,8 +149,9 @@ async function populateScores(osu_user_id) {
     }
     tableRow.appendChild(pp);
 
-    set.innerHTML = `<span class="hide">${score.created_at}</span>${formatRelativeTime(score.created_at)
-      }`;
+    set.innerHTML = `<span class="hide">${score.created_at}</span>${
+      formatRelativeTime(score.created_at)
+    }`;
     tableRow.appendChild(set);
 
     rows.push(tableRow);
@@ -158,7 +164,6 @@ function calculateFailPoint(stats, circles, sliders, spinners) {
   const totalObjects = circles + sliders + spinners;
   const totalHits = stats.count_300 + stats.count_100 + stats.count_50 +
     stats.count_miss;
-  console.log(totalObjects, totalHits);
   return ((totalHits / totalObjects) * 100);
 }
 

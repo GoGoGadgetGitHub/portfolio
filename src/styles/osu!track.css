@@ -89,3 +89,20 @@ div.dt-container .dt-search input {
 div#myTable_info.dt-info {
   color: var(--foreground);
 }
+
+.grade {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  text-align: center;
+}
+
+
+.fail-percent {
+  padding-left: 4%;
+}
+
+.rank-image {
+  margin: auto 0;
+  width: 3em;
+}
