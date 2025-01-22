@@ -58,11 +58,7 @@ async function populateScores(osu_user_id) {
 
   const rows = [];
   for (const i in scores) {
-    const scoreEntry = scores[i];
-    const score = scoreEntry.score;
-
     const songName = document.createElement("td");
-    songName.classList.add("song-name");
     const sr = document.createElement("td");
     const acc = document.createElement("td");
     const hits = document.createElement("td");
@@ -71,18 +67,16 @@ async function populateScores(osu_user_id) {
     const set = document.createElement("td");
 
     const tableRow = document.createElement("tr");
+    const scoreEntry = scores[i];
+    const score = scoreEntry.score;
 
     const songImage = document.createElement("img");
-    songImage.classList.add("song-image");
-    songImage.src = score.beatmapset.covers.list;
-
+    songImage.classList.add("songImage");
     const songLink = document.createElement("a");
-    songLink.classList.add("song-link");
-    songLink.href = score.beatmap.url;
-
     const songNameText = document.createElement("p");
+    songImage.src = score.beatmapset.covers.list;
     songNameText.textContent = score.beatmapset.title;
-
+    songLink.href = score.beatmap.url;
     songLink.appendChild(songNameText);
     songName.appendChild(songImage);
     songName.appendChild(songLink);

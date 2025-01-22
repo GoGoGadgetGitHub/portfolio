@@ -97,7 +97,6 @@ div#myTable_info.dt-info {
   text-align: center;
 }
 
-
 .fail-percent {
   padding-left: 4%;
 }
@@ -105,4 +104,23 @@ div#myTable_info.dt-info {
 .rank-image {
   margin: auto 0;
   width: 3em;
+}
+
+.song-name {
+  text-align: center;
+}
+
+.song-image {
+  display: inline;
+  width: 4em;
+}
+
+.song-link {
+  text-decoration: none;
+  width: 100%;
+}
+
+.song-link p {
+  display: inline;
+  margin: auto;
 }
