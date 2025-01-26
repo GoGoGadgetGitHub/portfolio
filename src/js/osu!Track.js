@@ -17,11 +17,30 @@ const message = document.getElementById("message");
 
 const table = new DataTable("#myTable", {
   paging: false,
-
   scrollY: 400,
+  columns: [
+    { "title": "Song Name" },
+    { "title": "*" },
+    { "title": "Accuacy" },
+    { "title": "Hits" },
+    { "title": "Grade" },
+    { "title": "PP" },
+    { "title": "Set" },
+  ],
+});
+
+addToggleFial();
+failRadio = document.getElementById("fail-radio");
+
+failRadio.addEventListener("change", () => {
+  const rows = document.getElementsByClassName("fail");
+  for (const score of rows) {
+    score.classList.toggle("hide");
+  }
 });
 
 track.addEventListener("click", async () => {
+  failRadio.checked = true;
   table.clear().draw();
   message.classList.add("hide");
   const osuUsername = document.getElementById("osu-username-input").value;
@@ -61,6 +80,11 @@ async function populateScores(osu_user_id) {
     const scoreEntry = scores[i];
     const score = scoreEntry.score;
 
+    const tableRow = document.createElement("tr");
+
+    tableRow.style.background =
+      `center / contain no-repeat linear-gradient(to right, var(--background-rgba0), var(--background-rgba1) 90%), url('${score.beatmapset.covers.slimcover}')`;
+
     const songName = document.createElement("td");
     songName.classList.add("song-name");
     const sr = document.createElement("td");
@@ -70,21 +94,10 @@ async function populateScores(osu_user_id) {
     const pp = document.createElement("td");
     const set = document.createElement("td");
 
-    const tableRow = document.createElement("tr");
-
-    const songImage = document.createElement("img");
-    songImage.classList.add("song-image");
-    songImage.src = score.beatmapset.covers.list;
-
     const songLink = document.createElement("a");
-    songLink.classList.add("song-link");
     songLink.href = score.beatmap.url;
+    songLink.textContent = score.beatmapset.title;
 
-    const songNameText = document.createElement("p");
-    songNameText.textContent = score.beatmapset.title;
-
-    songLink.appendChild(songNameText);
-    songName.appendChild(songImage);
     songName.appendChild(songLink);
     tableRow.appendChild(songName);
 
@@ -149,6 +162,7 @@ async function populateScores(osu_user_id) {
         );
         failPercent.textContent = `${Math.round(failPoint * 100) / 100}%`;
         grade.appendChild(failPercent);
+        tableRow.classList.add("fail");
         break;
     }
     grade.classList.add("grade");
@@ -231,5 +245,38 @@ function formatRelativeTime(timestamp) {
     return rtf.format(-hours, "hour");
   } else {
     return rtf.format(-days, "day");
+  }
+}
+
+//Add toggle fail component to datatables
+function addToggleFial() {
+  const controlRow = document.getElementsByClassName(
+    "dt-layout-cell dt-layout-end",
+  );
+
+  for (const component of controlRow) {
+    //Checking if this is the div we need to add the component too
+    if (
+      component.firstChild && component.firstChild.className === "dt-search"
+    ) {
+      component.id = "table-controls";
+
+      const toggleFail = document.createElement("div");
+      toggleFail.classList.add("toggle-fail");
+      component.appendChild(toggleFail);
+
+      const failRadioLabel = document.createElement("label");
+      failRadioLabel.textContent = "Display Fails:";
+
+      const failRadio = document.createElement("input");
+      failRadio.type = "checkbox";
+      failRadio.id = "fail-radio";
+      failRadio.checked = true;
+
+      toggleFail.appendChild(failRadioLabel);
+      toggleFail.appendChild(failRadio);
+
+      return;
+    }
   }
 }

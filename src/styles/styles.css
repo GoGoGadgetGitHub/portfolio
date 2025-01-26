@@ -1,6 +1,8 @@
 :root {
     /* Special */
     --background: #0D0D10;
+    --background-rgba1: rgba(13, 13, 16, 1);
+    --background-rgba0: rgba(13, 13, 16, 0.6);
     --foreground: #c2c2c3;
     --cursor: #c2c2c3;
 
@@ -21,11 +23,6 @@
     --color13: #996B60;
     --color14: #D2936C;
     --color15: #c2c2c3;
-}
-
-@font-face {
-    font-family: "customFont";
-    src: "../fonts/BitstreamVeraSansMono/BitstromWeraNerdFont-Regular.ttf";
 }
 
 html {

@@ -53,26 +53,34 @@
   height: 2em;
 }
 
-td {
-  text-align: center;
-}
 
-table {
+#myTable {
   color: var(--foreground);
+  border-collapse: separate;
+  border-spacing: 0 1em;
+  text-align: center;
 }
 
 thead {
-  color: var(--background);
+  color: var(--foreground);
 }
 
 .table-head th {
-  background: var(--foreground);
+  background: var(--background);
   border-radius: 15px;
 }
 
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 div.dt-search {
-  margin: 0 auto;
   text-align: center;
+  width: max-content;
+  display: inline;
+  margin: 0 auto;
 }
 
 .dt-search label {
@@ -86,6 +94,16 @@ div.dt-container .dt-search input {
   margin-left: 1%;
 }
 
+.toggle-fail {
+  width: max-content;
+  display: inline;
+  margin: auto;
+}
+
+.toggle-fail label {
+  color: var(--foreground);
+}
+
 div#myTable_info.dt-info {
   color: var(--foreground);
 }
@@ -95,10 +113,12 @@ div#myTable_info.dt-info {
   flex-direction: row-reverse;
   justify-content: center;
   text-align: center;
+  margin: auto 0;
 }
 
 .fail-percent {
   padding-left: 4%;
+  margin: 0;
 }
 
 .rank-image {
@@ -107,20 +127,22 @@ div#myTable_info.dt-info {
 }
 
 .song-name {
+  text-align: unset;
+}
+
+.song-name a {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+thead tr.table-head {
+  display: hidden;
+}
+
+table.dataTable thead {
   text-align: center;
 }
 
-.song-image {
-  display: inline;
-  width: 4em;
-}
-
-.song-link {
-  text-decoration: none;
-  width: 100%;
-}
-
-.song-link p {
-  display: inline;
-  margin: auto;
+div.dt-scroll-headInner {
+  background-color: rgba(0, 0, 0, 0);
 }
