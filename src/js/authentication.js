@@ -24,7 +24,7 @@ if (login) {
 
     //TODO: check if user exists using email and profiles tabel
 
-    var { data, error } = await supabase.auth.signInWithOtp({
+    const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: "https://gogogadgetgithub.github.io/portfolio/",
