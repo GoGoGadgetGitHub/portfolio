@@ -2,26 +2,26 @@ import { supabase } from "./supabaseClient.js";
 
 const auth = document.getElementById("auth");
 const logingLink = document.getElementById("login-link");
-const dropdown = document.getElementById("dropdown-content")
-authCheck()
+const dropdown = document.getElementById("dropdown-content");
+authCheck();
 
 async function authCheck() {
   if (await checkUser()) {
-    auth.textContent = await getEmail()
-    auth.onclick = expand
-    populate()
+    auth.textContent = await getEmail();
+    auth.onclick = expand;
+    populate();
   }
 }
 
 async function getEmail() {
-  var { data: { user }, userError } = await supabase.auth.getUser()
+  const { data: { user }, userError } = await supabase.auth.getUser();
 
   if (userError) {
-    console.log(`Error getting user: ${error.message}`)
-    return
+    console.log(`Error getting user: ${error.message}`);
+    return;
   }
 
-  return user.email
+  return user.email;
 }
 
 /*export async function getUsername() {
@@ -50,46 +50,45 @@ async function getEmail() {
   return username
 }*/
 
-
 function expand() {
   if (dropdown.classList.contains("hide")) {
-    dropdown.classList.remove("hide")
-    return
+    dropdown.classList.remove("hide");
+    return;
   }
-  dropdown.classList.add("hide")
+  dropdown.classList.add("hide");
 }
 
 function populate() {
-  let entry = document.createElement("div")
-  entry.id = "user-div"
-  entry.textContent = "Log out"
-  dropdown.appendChild(entry)
-  entry.onclick = logout
-  entry = document.createElement("div")
-  entry.id = "user-div"
-  entry.textContent = "Delete Account"
-  dropdown.appendChild(entry)
+  let entry = document.createElement("div");
+  entry.id = "user-div";
+  entry.textContent = "Log out";
+  dropdown.appendChild(entry);
+  entry.onclick = logout;
+  entry = document.createElement("div");
+  entry.id = "user-div";
+  entry.textContent = "Delete Account";
+  dropdown.appendChild(entry);
 }
 
 async function logout() {
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut();
   if (error) {
-    console.log(`Error signing out: ${error.message}`)
+    console.log(`Error signing out: ${error.message}`);
   }
-  location.reload()
+  location.reload();
 }
 
 export async function checkUser() {
-  console.log("checking user")
-  const { data: { session }, error } = await supabase.auth.getSession()
+  console.log("checking user");
+  const { data: { session }, error } = await supabase.auth.getSession();
   if (error) {
-    console.log(`Can't check session for some odd reason: ${error.message}`)
-    return false
+    console.log(`Can't check session for some odd reason: ${error.message}`);
+    return false;
   }
   if (session) {
-    console.log("user found")
-    return true
+    console.log("user found");
+    return true;
   }
-  console.log("no user logged in")
-  return false
+  console.log("no user logged in");
+  return false;
 }

@@ -26,6 +26,9 @@ if (login) {
 
     var { data, error } = await supabase.auth.signInWithOtp({
       email,
+      options: {
+        emailRedirectTo: "https://gogogadgetgithub.github.io/portfolio/",
+      },
     });
 
     if (error) {
