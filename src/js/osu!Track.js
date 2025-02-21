@@ -30,7 +30,7 @@ const table = new DataTable("#myTable", {
 });
 
 addToggleFial();
-failRadio = document.getElementById("fail-radio");
+let failRadio = document.getElementById("fail-radio");
 
 failRadio.addEventListener("change", () => {
   const rows = document.getElementsByClassName("fail");
