@@ -1,6 +1,5 @@
 import { supabase } from "./supabaseClient.js";
 import "datatables.net";
-//TODO: find better rank icons
 import a_rank from "../assets/a-rank.svg";
 import b_rank from "../assets/b-rank.svg";
 import c_rank from "../assets/c-rank.svg";
@@ -14,6 +13,20 @@ import DataTable from "datatables.net-dt";
 
 const track = document.getElementById("track");
 const message = document.getElementById("message");
+const loader = document.getElementById("loader");
+
+const statSubmited = document.getElementById("submited");
+const statAcc = document.getElementById("acc");
+const statBpm = document.getElementById("bpm");
+const statMissCount = document.getElementById("misscount");
+const statSr = document.getElementById("sr");
+
+let scores = undefined;
+
+function toggleLoading(button, loader) {
+  loader.classList.toggle("hide");
+  button.classList.toggle("hide");
+}
 
 const table = new DataTable("#myTable", {
   paging: false,
@@ -40,34 +53,76 @@ failRadio.addEventListener("change", () => {
 });
 
 track.addEventListener("click", async () => {
+  toggleLoading(track, loader);
   failRadio.checked = true;
   table.clear().draw();
   message.classList.add("hide");
+
+  //add new plays
   const osuUsername = document.getElementById("osu-username-input").value;
   const { plays, osu_user_id, error } = await recentPlays(osuUsername);
 
   if (error === "id-fail") {
     message.classList.remove("hide");
     message.textContent = "No such user!";
+    toggleLoading(track, loader);
     return;
   }
   if (error) {
     message.classList.remove("hide");
     message = "Something went wrong :(";
+    toggleLoading(track, loader);
     return;
   }
-  console.log(plays);
 
-  await populateScores(osu_user_id);
+  //get scores from db
+  scores = await getScoresFromDB(osu_user_id);
+
+  //populate table
+  populateScores(osu_user_id);
+
+  //fill stats
+  await populateStats(osu_user_id);
+
+  toggleLoading(track, loader);
 });
 
-async function populateScores(osu_user_id) {
+async function populateStats(osu_user_id, sessionID) {
+  //if not session ID is provided then use the last known one in the database
+  if (!sessionID) {
+    const { data: lastScore, error: lastScoreError } = await supabase.rpc(
+      "get_latest_score",
+      { p_osu_user_id: osu_user_id },
+    );
+
+    if (lastScoreError) {
+      console.error("could not retrieve latest score, using id 0");
+      sessionID = 0;
+    }
+
+    sessionID = lastScore.session_id;
+  }
+
+  const sessionScores = getScoresForSession(sessionID);
+  console.log(sessionScores.length);
+
+  const acc = calcAvg("accuracy", sessionScores);
+  const bpm = calcAvg("bpm", sessionScores);
+  const misscount = calcAvg("count_miss", sessionScores);
+  const sr = calcAvg("difficulty_rating", sessionScores);
+
+  statSubmited.innerText = `Submited: ${sessionScores.length}`;
+  statAcc.innerText = `Accuracy: ${Math.round(acc * 100 * 100) / 100}`;
+  statBpm.innerText = `BPM: ${Math.round(bpm * 100) / 100}`;
+  statMissCount.innerText = `Miss Count: ${Math.round(misscount * 100) / 100}`;
+  statSr.innerText = `SR: ${Math.round(sr * 100) / 100}`;
+}
+
+async function getScoresFromDB(osu_user_id) {
   const { data: scores, error: selectError } = await supabase
     .from("osu_scores")
-    .select("score")
+    .select("*")
     .eq("osu_user_id", osu_user_id);
-
-  console.log(scores);
 
   if (selectError) {
     console.error(
@@ -75,6 +130,11 @@ async function populateScores(osu_user_id) {
     );
   }
 
+  console.log(scores);
+  return scores;
+}
+
+function populateScores() {
   const rows = [];
   for (const i in scores) {
     const scoreEntry = scores[i];
@@ -279,4 +339,37 @@ function addToggleFial() {
       return;
     }
   }
+}
+
+function getScoresForSession(sessionID) {
+  const sessionScores = [];
+
+  for (const score of scores) {
+    if (score.session_id === sessionID && score.score.rank !== "F") {
+      sessionScores.push(score);
+    }
+  }
+  return sessionScores;
+}
+
+function calcAvg(type, scores) {
+  let sum = 0;
+
+  for (const score of scores) {
+    if (type === "count_miss") {
+      console.log(`count_miss: ${score.score.statistics[type]}`);
+      sum += score.score.statistics[type];
+      continue;
+    }
+
+    if ((type === "bpm") || (type === "difficulty_rating")) {
+      console.log(`${type}: ${score.score.beatmap[type]}`);
+      sum += score.score.beatmap[type];
+      continue;
+    }
+
+    console.log(`${type}: ${score.score[type]}`);
+    sum += score.score[type];
+  }
+  return sum / scores.length;
 }

@@ -109,7 +109,6 @@ div#myTable_info.dt-info {
 }
 
 .grade {
-  display: flex;
   flex-direction: row-reverse;
   justify-content: center;
   text-align: center;
@@ -122,7 +121,7 @@ div#myTable_info.dt-info {
 }
 
 .rank-image {
-  margin: auto 0;
+  margin: auto;
   width: 3em;
 }
 
@@ -135,6 +134,10 @@ div#myTable_info.dt-info {
   text-decoration: none;
 }
 
+tbody#scores-table tr {
+  font-size: 18px;
+}
+
 thead tr.table-head {
   display: hidden;
 }
@@ -145,4 +148,21 @@ table.dataTable thead {
 
 div.dt-scroll-headInner {
   background-color: rgba(0, 0, 0, 0);
+}
+
+div#loader.osu-track-loader {
+  margin-top: 5%;
+}
+
+div.stats {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--foreground);
+  padding: .1rem;
+  border-radius: 15px;
+}
+
+div.stats stat {
+  display: inline-block;
+  margin-right: 3rem;
 }

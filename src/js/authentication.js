@@ -15,12 +15,21 @@ task. So i believe in this case it's justified
 const login = document.getElementById("login");
 const signup = document.getElementById("signup");
 const message = document.getElementById("message");
+const button = document.getElementById("submit");
+const loader = document.getElementById("loader");
+
+function toggleLoading(button, loader) {
+  loader.classList.toggle("hide");
+  button.classList.toggle("hide");
+}
 
 if (login) {
   login.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const email = document.getElementById("email").value;
+
+    toggleLoading(button, loader);
 
     //TODO: check if user exists using email and profiles tabel
 
@@ -30,6 +39,8 @@ if (login) {
         emailRedirectTo: "https://gogogadgetgithub.github.io/portfolio",
       },
     });
+
+    toggleLoading(button, loader);
 
     if (error) {
       message.textContent = error.message;
@@ -48,17 +59,25 @@ if (signup) {
     async (event) => {
       event.preventDefault();
 
+      toggleLoading(button, loader);
+
       const email = document.getElementById("email").value;
       const username = document.getElementById("username").value;
 
       try {
         //this will create a user if one does not exist
         const { data: magicData, error: magicError } = await supabase.auth
-          .signInWithOtp({ email });
+          .signInWithOtp({
+            email,
+            options: {
+              emailRedirectTo: "https://gogogadgetgithub.github.io/portfolio",
+            },
+          });
 
         //there was an error with user login/signup
         if (magicError) {
-          console.log(magicError.message);
+          message.textContent = magicError.message;
+          toggleLoading(button, loader);
           return;
         }
 
@@ -79,35 +98,8 @@ if (signup) {
         message.textContent = "some big bad scary error";
         console.error(err);
       }
+
+      toggleLoading(button, loader);
     },
   );
-}
-
-async function newUser(username, email) {
-  //This is the long way of calling an edge function
-  /*
-  const url = "https://jpxdwuzsxkcerplprlwv.supabase.co/functions/v1/new-user";
-  const headers = {
-    "Content-Type": "application/json",
-  };
-
-  let response;
-  try {
-    response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ username }),
-    });
-    if (!response.ok) {
-      console.log(
-        `HTTP error: ${response.status} - ${response.statusText}. In main call`,
-      );
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("some wacky error:", error);
-  }
-  return true;
-  */
 }
