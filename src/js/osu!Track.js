@@ -59,7 +59,6 @@ async function changeSession(sessionID, osu_user_id) {
 
 function setStartEndText(start, end) {
   const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "UTC",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
