@@ -92,6 +92,10 @@ h2 {
     font-size: 3rem;
 }
 
+h3 {
+    color: var(--foreground);
+}
+
 .about-me {
     display: flex;
     justify-content: center;

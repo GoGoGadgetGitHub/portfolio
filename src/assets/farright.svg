@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="17.380852"
+   height="14.95436"
+   id="down-arrow"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="swatch2">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       id="swatch1">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop1" />
+    </linearGradient>
+  </defs>
+  <path
+     d="M 9.1427934,1.7017678 14.970817,7.4373753 9.2352114,13.2654 a 1,1 0 0 0 1.4252556,1.402655 L 17.094424,8.130426 A 0.992,0.992 0 0 0 17.380737,7.4181141 0.997,0.997 0 0 0 17.083072,6.7104704 L 10.545447,0.27651281 A 1,1 0 0 0 9.1427934,1.7017678 Z"
+     id="path1-7"
+     style="fill:#ffffff;fill-opacity:1" />
+  <path
+     d="M 0.28627843,1.7004295 6.1143017,7.436037 0.37869663,13.264061 A 1,1 0 0 0 1.8039517,14.666716 L 8.2379084,8.1290877 A 0.992,0.992 0 0 0 8.5242214,7.4167758 0.997,0.997 0 0 0 8.2265564,6.7091321 L 1.6889325,0.27517451 A 1,1 0 0 0 0.28627843,1.7004295 Z"
+     id="path1"
+     style="fill:#ffffff;fill-opacity:1" />
+</svg>

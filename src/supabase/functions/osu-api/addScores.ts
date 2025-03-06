@@ -20,7 +20,8 @@ export async function addScores(scores, osu_user_id) {
     return false;
   }
 
-  // if the user has no previos score in the table then we'll start with an initial session id 0
+  // if the latest score stored procedure returns null for the user id,
+  // this means that there are no scores saved for that user and we need to start with a session ID of 0
   const hadScores = lastScore.osu_user_id !== null;
 
   console.log(`User had scores saved: ${hadScores}`);
@@ -33,36 +34,39 @@ export async function addScores(scores, osu_user_id) {
   for (const i in scores) {
     const score = scores[i];
 
-    const timeStampNext = new Date(score.created_at);
+    const timeStampCurrent = new Date(score.created_at);
 
-    //on the first itteration of the loop prev score will be undefined
-    const timeStamPrev = prevScore ? new Date(prevScore.created_at) : null;
+    let timeStamPrev: Date;
 
-    //if there were no scores logged for this user the time stamp of the last score
-    //will be the time stamp of the next score
-    const timeStampLast = hadScores
-      ? new Date(lastScore.created_at)
-      : timeStampNext;
+    if (prevScore) {
+      timeStamPrev = new Date(prevScore.created_at);
+    } else if (hadScores) {
+      timeStamPrev = new Date(lastScore.created_at);
+    } else {
+      timeStamPrev = timeStampCurrent;
+    }
 
     //We reached the end of new scores if the user had previos scores and the last
     //know previos score's timestamp is equal to the score we want to add
-    const finished = (timeStampNext.getTime() === timeStampLast.getTime()) &&
+    //this assumes the recent plays end point returns scores in accending order of time
+    const finished = (timeStampCurrent.getTime() ===
+      new Date(lastScore.created_at).getTime()) &&
       hadScores;
     if (finished) {
       console.log(`reached end of new scores. ${count} added`);
       break;
     }
+    //if there were no scores logged for this user then we would just log all the scores returned from the recent
+    //plays end point i.e. there is no break condition
 
-    const timeDiffLast = timeStampCompare(timeStampLast, timeStampNext);
-    const timeDiffPrev = timeStampCompare(timeStamPrev, timeStampNext);
-
-    //If this is the first itteration of the the loop the time diffrence between scores will be the diffrence
-    //between the last score i have of that user in the database and the next score i want to add
-    //other wise it will be the time diffrence between the pevious score added and the next one
-    const timeDiffMin = prevScore ? timeDiffPrev : timeDiffLast;
+    //to determain the session id we need to look at the time diffrence between the last/prev score and the current score
+    const timeDiff = timeStampCompare(timeStamPrev, timeStampCurrent);
 
     // for a time diffrence more than 1 hour the session ID is incremented
-    session_id = (timeDiffMin > 60) ? session_id += 1 : session_id;
+    if (timeDiff > 60) {
+      console.log(`Starting new session... time diffrence is ${timeDiff}`);
+      session_id += 1;
+    }
 
     //add record
     const created_at = score.created_at;

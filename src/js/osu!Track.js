@@ -10,6 +10,7 @@ import x_rank from "../assets/x-rank.svg";
 import sh_rank from "../assets/sh-rank.svg";
 import xh_rank from "../assets/xh-rank.svg";
 import DataTable from "datatables.net-dt";
+import { Pagination } from "./component/pagination.js";
 
 const track = document.getElementById("track");
 const message = document.getElementById("message");
@@ -43,17 +44,69 @@ const table = new DataTable("#myTable", {
 });
 
 addToggleFial();
+let pager = undefined;
+startEndComponent();
+
 const failRadio = document.getElementById("fail-radio");
 
-failRadio.addEventListener("change", () => {
-  const rows = document.getElementsByClassName("fail");
-  for (const score of rows) {
-    score.classList.toggle("hide");
+async function changeSession(sessionID, osu_user_id) {
+  const sessionScores = scores[sessionID];
+  const { start, end } = await getStartEnd(osu_user_id, sessionID);
+  populateScores(sessionScores);
+  setStartEndText(start, end);
+  populateStats(sessionScores);
+}
+
+function setStartEndText(start, end) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  document.getElementById("session-start").innerText = `Starts at: ${
+    formatter.format(new Date(start))
+  }`;
+  document.getElementById("session-end").innerText = `Ends at: ${
+    formatter.format(new Date(end))
+  }`;
+}
+
+async function getStartEnd(osu_user_id, sessionID) {
+  //calling stored procedure
+  const { data: startEnd, error } = await supabase.rpc(
+    "get_start_and_end_of_session",
+    { p_osu_user_id: osu_user_id, p_session_id: sessionID },
+  );
+
+  if (error) {
+    console.error(
+      `could net retrieve start and end of session for session ${sessionID}`,
+    );
+    return null;
   }
+
+  return {
+    start: startEnd[0].start_time,
+    end: startEnd[0].end_time,
+  };
+
+  //chaning start and end text
+}
+
+failRadio.addEventListener("change", () => {
+  toggleFials();
 });
 
 track.addEventListener("click", async () => {
   toggleLoading(track, loader);
+  if (pager) {
+    pager.node.remove();
+  }
   failRadio.checked = true;
   table.clear().draw();
   message.classList.add("hide");
@@ -74,44 +127,49 @@ track.addEventListener("click", async () => {
     toggleLoading(track, loader);
     return;
   }
+  const latestSession = await getLatestSession(osu_user_id);
 
-  //get scores from db
   scores = await getScoresFromDB(osu_user_id);
+  console.log(scores);
 
-  //populate table
-  populateScores(osu_user_id);
-
-  //fill stats
-  await populateStats(osu_user_id);
+  pager = addPager(latestSession, osu_user_id);
+  await changeSession(latestSession, osu_user_id);
 
   toggleLoading(track, loader);
 });
 
-async function populateStats(osu_user_id, sessionID) {
-  //if not session ID is provided then use the last known one in the database
-  if (!sessionID) {
-    const { data: lastScore, error: lastScoreError } = await supabase.rpc(
-      "get_latest_score",
-      { p_osu_user_id: osu_user_id },
-    );
+function toggleFials() {
+  const rows = document.getElementsByClassName("fail");
+  for (const score of rows) {
+    score.classList.toggle("hide");
+  }
+}
 
-    if (lastScoreError) {
-      console.error("could not retrieve latest score, using id 0");
-      sessionID = 0;
-    }
+//Try to get the latest session ID for the user and if that fails then set the session ID to 0
+async function getLatestSession(osu_user_id) {
+  const { data: lastScore, error: lastScoreError } = await supabase.rpc(
+    "get_latest_score",
+    { p_osu_user_id: osu_user_id },
+  );
 
+  if (lastScoreError) {
+    console.error("could not retrieve latest score, using id 0");
+    sessionID = 0;
+  } else {
     sessionID = lastScore.session_id;
   }
 
-  const sessionScores = getScoresForSession(sessionID);
-  console.log(sessionScores.length);
+  return sessionID;
+}
 
-  const acc = calcAvg("accuracy", sessionScores);
-  const bpm = calcAvg("bpm", sessionScores);
-  const misscount = calcAvg("count_miss", sessionScores);
-  const sr = calcAvg("difficulty_rating", sessionScores);
+function populateStats(sessionScores) {
+  const passes = calcAvg("bpm", sessionScores).passes;
+  const acc = calcAvg("accuracy", sessionScores).avg;
+  const bpm = calcAvg("bpm", sessionScores).avg;
+  const misscount = calcAvg("count_miss", sessionScores).avg;
+  const sr = calcAvg("difficulty_rating", sessionScores).avg;
 
-  statSubmited.innerText = `Submited: ${sessionScores.length}`;
+  statSubmited.innerText = `Submited: ${passes}`;
   statAcc.innerText = `Accuracy: ${Math.round(acc * 100 * 100) / 100}`;
   statBpm.innerText = `BPM: ${Math.round(bpm * 100) / 100}`;
   statMissCount.innerText = `Miss Count: ${Math.round(misscount * 100) / 100}`;
@@ -130,15 +188,23 @@ async function getScoresFromDB(osu_user_id) {
     );
   }
 
-  console.log(scores);
-  return scores;
+  const arrangedScores = {};
+  for (const score of scores) {
+    if (!arrangedScores[score.session_id]) {
+      arrangedScores[score.session_id] = [];
+      arrangedScores[score.session_id].push(score);
+    }
+    arrangedScores[score.session_id].push(score);
+  }
+
+  return arrangedScores;
 }
 
-function populateScores() {
+function populateScores(sessionScores) {
   const rows = [];
-  for (const i in scores) {
-    const scoreEntry = scores[i];
-    const score = scoreEntry.score;
+  table.clear().draw();
+  for (let score of sessionScores) {
+    score = score.score;
 
     const tableRow = document.createElement("tr");
 
@@ -180,7 +246,7 @@ function populateScores() {
     let failPoint;
     switch (score.rank) {
       case "XH":
-        image.innerHTML = '<span class="hide">0</span>';
+        grade.innerHTML = '<span class="hide">0</span>';
         rankImage.src = xh_rank;
         break;
       case "X":
@@ -247,6 +313,10 @@ function populateScores() {
   }
 
   table.rows.add(rows).draw();
+
+  if (!failRadio.checked) {
+    toggleFials();
+  }
 }
 
 function calculateFailPoint(stats, circles, sliders, spinners) {
@@ -261,28 +331,16 @@ function calculateFailPoint(stats, circles, sliders, spinners) {
 //Adds new plays for existing users and new users
 //Returns a list of recent plays and the osu user id of the username specified
 export async function recentPlays(osuUsername) {
-  const url = "https://jpxdwuzsxkcerplprlwv.supabase.co/functions/v1/osu-api";
-  const headers = {
-    "Content-Type": "application/json",
-  };
-
-  let response;
-  try {
-    response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ osuUsername }),
-    });
-    if (!response.ok) {
-      console.log(
-        `HTTP error: ${response.status} - ${response.statusText}. In main call`,
-      );
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("some wacky error:", error);
+  const { data, error } = await supabase.functions.invoke("osu-api", {
+    body: JSON.stringify({ osuUsername }),
+  });
+  if (error) {
+    console.log(
+      `There as an error invoing the edge function: ${error.message}`,
+    );
+    return null;
   }
+  return data;
 }
 
 function formatRelativeTime(timestamp) {
@@ -306,6 +364,29 @@ function formatRelativeTime(timestamp) {
   } else {
     return rtf.format(-days, "day");
   }
+}
+
+function startEndComponent() {
+  let startP;
+  let endP;
+  if (!document.getElementById("start-end-div")) {
+    const targetDiv = document.getElementById("myTable_info").parentNode;
+
+    const startEndDiv = document.createElement("div");
+    startEndDiv.classList.add("start-end-div");
+
+    startP = document.createElement("p");
+    startP.id = "session-start";
+    endP = document.createElement("p");
+    endP.id = "session-end";
+
+    startEndDiv.appendChild(startP);
+    startEndDiv.appendChild(endP);
+
+    targetDiv.append(startEndDiv);
+  }
+  startP = document.getElementById("session-start");
+  endP = document.getElementById("session-end");
 }
 
 //Add toggle fail component to datatables
@@ -341,35 +422,53 @@ function addToggleFial() {
   }
 }
 
-function getScoresForSession(sessionID) {
-  const sessionScores = [];
+//TODO: The pager seems to be behaving wierdly in the case of a small amount of sessions. not all sessions are being shown
+function addPager(maxPages, osu_user_id) {
+  const controlRow = document.getElementsByClassName(
+    "dt-layout-cell dt-layout-end",
+  );
 
-  for (const score of scores) {
-    if (score.session_id === sessionID && score.score.rank !== "F") {
-      sessionScores.push(score);
+  for (const component of controlRow) {
+    //Checking if this is the div we need to add the component too
+    if (
+      component.firstChild && component.firstChild.className === "dt-search"
+    ) {
+      pagerObject = new Pagination(maxPages);
+      component.appendChild(pagerObject.node);
+
+      document.addEventListener("moved", async () => {
+        const sessionID = pager.pages[pager.pointer].value;
+        await changeSession(sessionID, osu_user_id);
+      });
+
+      return pagerObject;
     }
   }
-  return sessionScores;
 }
 
 function calcAvg(type, scores) {
   let sum = 0;
+  let passes = 0;
 
   for (const score of scores) {
+    if (score.score.rank === "F") {
+      continue;
+    }
+
     if (type === "count_miss") {
-      console.log(`count_miss: ${score.score.statistics[type]}`);
       sum += score.score.statistics[type];
+      passes++;
       continue;
     }
 
     if ((type === "bpm") || (type === "difficulty_rating")) {
-      console.log(`${type}: ${score.score.beatmap[type]}`);
       sum += score.score.beatmap[type];
+      passes++;
       continue;
     }
 
-    console.log(`${type}: ${score.score[type]}`);
+    passes++;
     sum += score.score[type];
   }
-  return sum / scores.length;
+  return { avg: sum / passes, passes: passes };
 }

@@ -1,5 +1,9 @@
 @import './styles.css';
 
+.selected-page {
+  color: var(--color3) !important;
+}
+
 .osu-username {
   color: var(--foreground);
   height: 5%;
@@ -165,4 +169,26 @@ div.stats {
 div.stats stat {
   display: inline-block;
   margin-right: 3rem;
+}
+
+.pagination img,
+.pagination p,
+.pagination div {
+  display: inline-block;
+  margin-left: 0.2rem;
+  margin-right: 0.2rem;
+}
+
+.pagination p {
+  color: var(--foreground);
+  width: 1.2rem;
+}
+
+.pagination p:hover {
+  color: var(--color4);
+  cursor: pointer;
+}
+
+.start-end-div {
+  color: var(--foreground);
 }

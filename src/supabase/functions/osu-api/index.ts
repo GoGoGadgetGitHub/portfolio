@@ -14,8 +14,6 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  //TODO: Handel user does not exist
-
   const { osuUsername } = await req.json();
   console.log(`The username passed is: ${osuUsername}`);
 
