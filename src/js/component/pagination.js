@@ -23,12 +23,26 @@ export class Pagination {
   }
 
   addEventListenters() {
-    this.left.addEventListener("click", () => this.move(false));
-    this.right.addEventListener("click", () => this.move(true));
+    this.left.addEventListener("click", () => {
+      this.move(false);
+      this.drawPages();
+      document.dispatchEvent(this.moved);
+    });
+    this.right.addEventListener("click", () => {
+      this.move(true);
+      this.drawPages();
+      document.dispatchEvent(this.moved);
+    });
+
     this.farLeft.addEventListener("click", () => this.begin());
     this.farRight.addEventListener("click", () => this.end());
+
     for (const page of this.pages) {
-      page.page.addEventListener("click", (event) => this.numberClicked(event));
+      page.page.addEventListener("click", (event) => {
+        this.numberClicked(event);
+        this.drawPages();
+        document.dispatchEvent(this.moved);
+      });
     }
   }
 
@@ -178,23 +192,17 @@ export class Pagination {
 
       if (this.maxPages <= 5) {
         this.pointer++;
-        this.drawPages();
-        document.dispatchEvent(this.moved);
         return;
       }
 
       if (this.pointer != 2 || rightEnd) {
         this.pointer++;
-        this.drawPages();
-        document.dispatchEvent(this.moved);
         return;
       }
 
       for (const page of this.pages) {
         page.value++;
-        this.drawPages();
       }
-      document.dispatchEvent(this.moved);
       return;
 
       //backwards
@@ -205,23 +213,17 @@ export class Pagination {
 
       if (this.maxPages <= 5) {
         this.pointer--;
-        this.drawPages();
-        document.dispatchEvent(this.moved);
         return;
       }
 
       if (this.pointer != 2 || leftEnd) {
         this.pointer--;
-        this.drawPages();
-        document.dispatchEvent(this.moved);
         return;
       }
 
       for (const page of this.pages) {
         page.value--;
-        this.drawPages();
       }
-      document.dispatchEvent(this.moved);
     }
   }
 }

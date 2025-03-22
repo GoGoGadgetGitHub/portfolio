@@ -9,52 +9,52 @@ import s_rank from "../assets/s-rank.svg";
 import x_rank from "../assets/x-rank.svg";
 import sh_rank from "../assets/sh-rank.svg";
 import xh_rank from "../assets/xh-rank.svg";
+import star from "../assets/star.svg";
 import DataTable from "datatables.net-dt";
 import { Pagination } from "./component/pagination.js";
 
 const track = document.getElementById("track");
 const message = document.getElementById("message");
 const loader = document.getElementById("loader");
-
 const statSubmited = document.getElementById("submited");
 const statAcc = document.getElementById("acc");
 const statBpm = document.getElementById("bpm");
 const statMissCount = document.getElementById("misscount");
 const statSr = document.getElementById("sr");
 
-let scores = undefined;
-
-function toggleLoading(button, loader) {
-  loader.classList.toggle("hide");
-  button.classList.toggle("hide");
-}
-
 const table = new DataTable("#myTable", {
   paging: false,
   scrollY: 400,
-  columns: [
-    { "title": "Song Name" },
-    { "title": "*" },
-    { "title": "Accuacy" },
-    { "title": "Hits" },
-    { "title": "Grade" },
-    { "title": "PP" },
-    { "title": "Set" },
-  ],
 });
+const srTitle = document.querySelector("#icon-header span.dt-column-title");
+srTitle.innerHTML = `<img src=${star}/>`;
 
-addToggleFial();
+addToggleFail();
 let pager = undefined;
+let osu_user_id = undefined;
 startEndComponent();
 
 const failRadio = document.getElementById("fail-radio");
 
-async function changeSession(sessionID, osu_user_id) {
-  const sessionScores = scores[sessionID];
-  const { start, end } = await getStartEnd(osu_user_id, sessionID);
-  populateScores(sessionScores);
+async function changeSession(sessionID) {
+  const session = await getSessionScoresFromDB(sessionID);
+
+  if (session === null) {
+    return null;
+  }
+
+  populateScores(session.scores);
+  changeTableInfo(
+    `Passes: ${session.passes}   Fails: ${session.fails}`,
+  );
+  const { start, end } = await getStartEnd(sessionID);
   setStartEndText(start, end);
-  populateStats(sessionScores);
+  populateStats(session);
+}
+
+function changeTableInfo(text) {
+  const targetDiv = document.getElementById("myTable_info");
+  targetDiv.innerText = text;
 }
 
 function setStartEndText(start, end) {
@@ -75,7 +75,7 @@ function setStartEndText(start, end) {
   }`;
 }
 
-async function getStartEnd(osu_user_id, sessionID) {
+async function getStartEnd(sessionID) {
   //calling stored procedure
   const { data: startEnd, error } = await supabase.rpc(
     "get_start_and_end_of_session",
@@ -98,21 +98,37 @@ async function getStartEnd(osu_user_id, sessionID) {
 }
 
 failRadio.addEventListener("change", () => {
-  toggleFials();
+  toggleFails();
 });
+
+window.addEventListener("resize", checkOverlap);
+
+function checkOverlap() {
+  const profile = document.getElementById("pro-container");
+  const usernameInput = document.getElementById("osu-username");
+
+  const proRect = profile.getBoundingClientRect();
+  const inpRect = usernameInput.getBoundingClientRect();
+
+  const isOverlapping = !(proRect.right < inpRect.left);
+
+  profile.style.visibility = isOverlapping ? "hidden" : "visible";
+}
 
 track.addEventListener("click", async () => {
   toggleLoading(track, loader);
+
   if (pager) {
-    pager.node.remove();
+    pager.div.remove();
   }
+
   failRadio.checked = true;
   table.clear().draw();
   message.classList.add("hide");
 
   //add new plays
   const osuUsername = document.getElementById("osu-username-input").value;
-  const { plays, osu_user_id, error } = await recentPlays(osuUsername);
+  const { osu_user_info, error } = await osuApi(osuUsername);
 
   if (error === "id-fail") {
     message.classList.remove("hide");
@@ -126,26 +142,45 @@ track.addEventListener("click", async () => {
     toggleLoading(track, loader);
     return;
   }
-  const latestSession = await getLatestSession(osu_user_id);
 
-  scores = await getScoresFromDB(osu_user_id);
-  console.log(scores);
+  osu_user_id = osu_user_info.id;
+  populateProfileComponent(osu_user_info.otherData);
 
-  pager = addPager(latestSession, osu_user_id);
-  await changeSession(latestSession, osu_user_id);
+  const latestSessionID = await getLatestSession(osu_user_id);
+
+  pager = addPager(latestSessionID);
+
+  await changeSession(latestSessionID);
 
   toggleLoading(track, loader);
 });
 
-function toggleFials() {
+function populateProfileComponent(osuUserData) {
+  console.log(osuUserData);
+  const image = document.getElementById("pro-img");
+  const rank = document.getElementById("pro-rank");
+  const pp = document.getElementById("pro-pp");
+  const score = document.getElementById("pro-score");
+  image.src = osuUserData.avatar_url;
+  rank.innerText = `Global Rank: #${osuUserData.rank_history.data[0]}`;
+  pp.innerText = `PP: ${osuUserData.statistics.pp}`;
+  score.innerText = `Score: ${osuUserData.statistics.ranked_score}`;
+}
+
+function toggleFails() {
   const rows = document.getElementsByClassName("fail");
   for (const score of rows) {
     score.classList.toggle("hide");
   }
 }
 
+function toggleLoading(button, loader) {
+  loader.classList.toggle("hide");
+  button.classList.toggle("hide");
+}
+
 //Try to get the latest session ID for the user and if that fails then set the session ID to 0
-async function getLatestSession(osu_user_id) {
+async function getLatestSession() {
   const { data: lastScore, error: lastScoreError } = await supabase.rpc(
     "get_latest_score",
     { p_osu_user_id: osu_user_id },
@@ -162,7 +197,7 @@ async function getLatestSession(osu_user_id) {
 }
 
 function populateStats(sessionScores) {
-  const passes = calcAvg("bpm", sessionScores).passes;
+  const passes = sessionScores.passes;
   const acc = calcAvg("accuracy", sessionScores).avg;
   const bpm = calcAvg("bpm", sessionScores).avg;
   const misscount = calcAvg("count_miss", sessionScores).avg;
@@ -175,11 +210,16 @@ function populateStats(sessionScores) {
   statSr.innerText = `SR: ${Math.round(sr * 100) / 100}`;
 }
 
-async function getScoresFromDB(osu_user_id) {
+async function getSessionScoresFromDB(session_id) {
+  //TODO: Some sessions still seem messed up. Session 19 on my profile for example has scores in it
+  //from 4 days agao and also scores form yesterday
+  //this implies that my session grouping still isn't working correctly
+
   const { data: scores, error: selectError } = await supabase
     .from("osu_scores")
     .select("*")
-    .eq("osu_user_id", osu_user_id);
+    .eq("osu_user_id", osu_user_id)
+    .eq("session_id", session_id);
 
   if (selectError) {
     console.error(
@@ -187,16 +227,25 @@ async function getScoresFromDB(osu_user_id) {
     );
   }
 
-  const arrangedScores = {};
-  for (const score of scores) {
-    if (!arrangedScores[score.session_id]) {
-      arrangedScores[score.session_id] = [];
-      arrangedScores[score.session_id].push(score);
-    }
-    arrangedScores[score.session_id].push(score);
+  console.log(scores);
+  if (scores === null) {
+    message.innerText = "You have set no scores in the last 24 hours :)";
+    message.classList.toggle("hide");
+    return null;
   }
 
-  return arrangedScores;
+  const session = { scores: [], fails: 0, passes: 0 };
+
+  for (const score of scores) {
+    session.scores.push(score);
+    if (score.score.rank === "F") {
+      session.fails++;
+    } else {
+      session.passes++;
+    }
+  }
+  console.log(session);
+  return session;
 }
 
 function populateScores(sessionScores) {
@@ -226,7 +275,13 @@ function populateScores(sessionScores) {
     songName.appendChild(songLink);
     tableRow.appendChild(songName);
 
-    sr.textContent = score.beatmap.difficulty_rating;
+    const rating = document.createElement("p");
+    rating.innerText = score.beatmap.difficulty_rating;
+    sr.appendChild(rating);
+    const starIcon = document.createElement("img");
+    starIcon.src = star;
+    sr.appendChild(starIcon);
+    sr.id = "star-rating";
     tableRow.appendChild(sr);
 
     acc.textContent = `${Math.round(score.accuracy * 100 * 100) / 100}%`;
@@ -314,7 +369,7 @@ function populateScores(sessionScores) {
   table.rows.add(rows).draw();
 
   if (!failRadio.checked) {
-    toggleFials();
+    toggleFails();
   }
 }
 
@@ -329,7 +384,7 @@ function calculateFailPoint(stats, circles, sliders, spinners) {
 //Adds a new osu profile to the database if it does not exist
 //Adds new plays for existing users and new users
 //Returns a list of recent plays and the osu user id of the username specified
-export async function recentPlays(osuUsername) {
+export async function osuApi(osuUsername) {
   const { data, error } = await supabase.functions.invoke("osu-api", {
     body: JSON.stringify({ osuUsername }),
   });
@@ -369,7 +424,7 @@ function startEndComponent() {
   let startP;
   let endP;
   if (!document.getElementById("start-end-div")) {
-    const targetDiv = document.getElementById("myTable_info").parentNode;
+    const targetDiv = document.getElementById("sessions");
 
     const startEndDiv = document.createElement("div");
     startEndDiv.classList.add("start-end-div");
@@ -389,7 +444,7 @@ function startEndComponent() {
 }
 
 //Add toggle fail component to datatables
-function addToggleFial() {
+function addToggleFail() {
   const controlRow = document.getElementsByClassName(
     "dt-layout-cell dt-layout-end",
   );
@@ -413,43 +468,46 @@ function addToggleFial() {
       failRadio.id = "fail-radio";
       failRadio.checked = true;
 
+      const failSpan = document.createElement("span");
+      failSpan.classList.add("checkmark");
+
       toggleFail.appendChild(failRadioLabel);
-      toggleFail.appendChild(failRadio);
+      failRadioLabel.appendChild(failRadio);
+      failRadioLabel.appendChild(failSpan);
 
       return;
     }
   }
 }
 
-//TODO: The pager seems to be behaving wierdly in the case of a small amount of sessions. not all sessions are being shown
-function addPager(maxPages, osu_user_id) {
-  const controlRow = document.getElementsByClassName(
-    "dt-layout-cell dt-layout-end",
-  );
+function addPager(maxPages) {
+  const targetDiv = document.getElementById("sessions");
 
-  for (const component of controlRow) {
-    //Checking if this is the div we need to add the component too
-    if (
-      component.firstChild && component.firstChild.className === "dt-search"
-    ) {
-      pagerObject = new Pagination(maxPages);
-      component.appendChild(pagerObject.node);
+  const pagerDiv = document.createElement("div");
+  pagerDiv.classList.add("pager");
+  const pagerTitle = document.createElement("h4");
+  pagerTitle.innerText = "Seslect Session:";
 
-      document.addEventListener("moved", async () => {
-        const sessionID = pager.pages[pager.pointer].value;
-        await changeSession(sessionID, osu_user_id);
-      });
+  pagerObject = new Pagination(maxPages);
+  pagerDiv.appendChild(pagerTitle);
+  pagerDiv.appendChild(pagerObject.node);
+  targetDiv.appendChild(pagerDiv);
 
-      return pagerObject;
-    }
-  }
+  //I have to add the event listener here otherwise it trys to add the event to the
+  //pager object before it exists
+  document.addEventListener("moved", async () => {
+    const sessionID = pagerObject.pages[pagerObject.pointer].value;
+    await changeSession(sessionID);
+  });
+
+  return { comp: pagerObject, div: pagerDiv };
 }
 
-function calcAvg(type, scores) {
+function calcAvg(type, sessionScores) {
   let sum = 0;
   let passes = 0;
 
-  for (const score of scores) {
+  for (const score of sessionScores.scores) {
     if (score.score.rank === "F") {
       continue;
     }

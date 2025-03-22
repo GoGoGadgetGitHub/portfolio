@@ -49,8 +49,6 @@ main {
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
-    position: sticky;
-    top: 0;
 }
 
 #auth {

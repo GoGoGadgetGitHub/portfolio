@@ -5,14 +5,18 @@
 }
 
 .osu-username {
+  display: inline-block;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   color: var(--foreground);
-  height: 5%;
-  margin: 2% auto;
+  height: max-content;
   width: max-content;
   text-align: center;
 }
 
 .osu-username input {
+  margin: 0 auto;
   display: block;
   border-radius: 15px;
   background: var(--foreground);
@@ -106,6 +110,53 @@ div.dt-container .dt-search input {
 
 .toggle-fail label {
   color: var(--foreground);
+  cursor: pointer;
+  user-select: none
+}
+
+.toggle-fail label input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  height: 1.5em;
+  width: 1.5em;
+  background-color: var(--foreground);
+  border-radius: 50%;
+  margin-left: 1em;
+}
+
+.toggle-fail label:hover input~.checkmark {
+  background-color: var(--color4);
+}
+
+.toggle-fail label input:checked~.checkmark {
+  background-color: var(--color3);
+}
+
+.checkmark::after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.toggle-fail label input:checked~.checkmark::after {
+  display: block;
+}
+
+.toggle-fail .checkmark::after {
+  left: 8px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
 }
 
 div#myTable_info.dt-info {
@@ -129,17 +180,18 @@ div#myTable_info.dt-info {
   width: 3em;
 }
 
-.song-name {
-  text-align: unset;
-}
-
 .song-name a {
   color: var(--foreground);
   text-decoration: none;
 }
 
+.song-name a:hover {
+  color: var(--color4);
+}
+
 tbody#scores-table tr {
   font-size: 18px;
+  height: 2rem;
 }
 
 thead tr.table-head {
@@ -147,7 +199,7 @@ thead tr.table-head {
 }
 
 table.dataTable thead {
-  text-align: center;
+  text-align: center !important;
 }
 
 div.dt-scroll-headInner {
@@ -160,7 +212,7 @@ div#loader.osu-track-loader {
 
 div.stats {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   background-color: var(--foreground);
   padding: .1rem;
   border-radius: 15px;
@@ -169,6 +221,35 @@ div.stats {
 div.stats stat {
   display: inline-block;
   margin-right: 3rem;
+}
+
+.pager h4 {
+  display: block;
+  height: max-content;
+  width: max-content;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.sessions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  width: 95%;
+  margin: auto;
+}
+
+.pager {
+  display: inline-block;
+  width: max-content;
+  height: max-content;
+}
+
+.pagination {
+  display: inline-block;
+  width: max-content;
+  height: max-content;
 }
 
 .pagination img,
@@ -182,6 +263,7 @@ div.stats stat {
 .pagination p {
   color: var(--foreground);
   width: 1.2rem;
+  text-align: center;
 }
 
 .pagination p:hover {
@@ -190,5 +272,55 @@ div.stats stat {
 }
 
 .start-end-div {
+  display: inline-block;
   color: var(--foreground);
+  height: max-content;
+  width: max-content;
+}
+
+#star-rating {
+  white-space: nowrap;
+}
+
+#star-rating img,
+#star-rating p {
+  display: inline-block;
+}
+
+.profile {
+  position: relative;
+  padding: 1rem;
+}
+
+.pro-container {
+  display: inline-block;
+  overflow: hidden;
+}
+
+.pro-comp {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: max-content;
+  height: max-content;
+}
+
+.pro-info {
+  display: inline-block;
+  width: max-content;
+  height: max-content;
+  color: var(--foreground);
+}
+
+.pro-image-container {
+  display: inline-block;
+}
+
+.pro-image-container img {
+  border-radius: 100%;
+  height: 8rem;
+}
+
+.pro-ul {
+  list-style: none;
 }

@@ -3,7 +3,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { recentPlays } from "./recentPlays.ts";
 import { getToken } from "./tokenFetch.ts";
 import { addScores } from "./addScores.ts";
-import { getUserID } from "./getUserID.ts";
+import { getUserInfo } from "./getUserInfo.ts";
 
 Deno.serve(async (req: Request) => {
   //CORS Preflight
@@ -17,8 +17,9 @@ Deno.serve(async (req: Request) => {
   const { osuUsername } = await req.json();
   console.log(`The username passed is: ${osuUsername}`);
 
-  const response = { plays: null, osu_user_id: null, error: null };
+  const response = { osu_user_info: null, error: null };
 
+  //TODO: The token caching does not work properly i need to fix it
   console.log(`Getting token`);
   const token = await getToken();
   if (token === null) {
@@ -29,11 +30,11 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  console.log("Getting osu user id from database.");
-  response.osu_user_id = await getUserID(osuUsername, token);
-  console.log(response.osu_user_id);
-  if (response.osu_user_id === null) {
-    response.error = "id-fail";
+  console.log("Getting osu user data.");
+  response.osu_user_info = await getUserInfo(osuUsername, token);
+  console.log(response.osu_user_info);
+  if (response.osu_user_info === null) {
+    response.error = "info-fail";
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders },
       status: 500,
@@ -41,7 +42,7 @@ Deno.serve(async (req: Request) => {
   }
 
   console.log("Fetching recent plays.");
-  response.plays = await recentPlays(response.osu_user_id, token);
+  const plays = await recentPlays(response.osu_user_info.id, token);
   if (response.plays === null) {
     response.error = "plays-fail";
     return new Response(JSON.stringify(response), {
@@ -51,7 +52,7 @@ Deno.serve(async (req: Request) => {
   }
 
   console.log("Adding scores to database.");
-  const added = await addScores(response.plays, response.osu_user_id);
+  const added = await addScores(plays, response.osu_user_info.id);
   if (!added) {
     response.error = "add-scores-fail";
     return new Response(JSON.stringify(response), {

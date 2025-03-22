@@ -1,17 +1,17 @@
 import { getClient } from "../_shared/supabase.ts";
-import { corsHeaders } from "../_shared/cors.ts";
 
-export async function getUserID(osuUsername: string, token: string) {
+export async function getUserInfo(osuUsername: string, token: string) {
   const supabase = getClient();
   if (supabase === null) {
     return null;
   }
+  //NOTE: Starting to wonder why i'm keeping a record of osu profiles
 
-  console.log(`Attempting to fetch id from database for ${osuUsername}`);
-  let { data: osu_user_id, error: selectError } = await supabase
+  console.log(`Attempting to fetch id from database for ${osuUsername}...`);
+  const { data: osu_user_id, error: selectError } = await supabase
     .from("osu_profiles")
     .select("osu_user_id")
-    .eq("osu_username", osuUsername)
+    .eq("osu_username", osuUsername.toUpperCase())
     .single();
 
   //PGRST116 is the error code for now rows returned, that's fine
@@ -24,24 +24,29 @@ export async function getUserID(osuUsername: string, token: string) {
     return null;
   }
 
-  if (osu_user_id) {
-    console.log(`ID found in database: ${osu_user_id.osu_user_id}`);
-    return osu_user_id.osu_user_id;
-  }
-  console.log("No ID found, fetching user data from osu API");
+  console.log("Fetching user data...");
   const userData = await getUserData(osuUsername, token);
   if (userData === null) {
     return null;
   }
-  await addOsuUser(userData, supabase);
-  return userData.id;
+
+  if (!osu_user_id) {
+    console.log(`User is not in database, adding profile entry`);
+    await addOsuUser(userData, supabase);
+  }
+
+  return { id: userData.id, otherData: userData };
 }
 
 //adds an osu profile to the profiles table
 async function addOsuUser(userData, supabase) {
   const { data, error: insertError } = await supabase
     .from("osu_profiles")
-    .insert([{ osu_user_id: userData.id, osu_username: userData.username }])
+    //Usernames are saved in all uppercase to allow for selecting ID with username
+    .insert([{
+      osu_user_id: userData.id,
+      osu_username: userData.username.toUpperCase(),
+    }])
     .select();
 
   if (insertError) {
