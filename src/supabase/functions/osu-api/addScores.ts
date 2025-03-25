@@ -26,7 +26,12 @@ export async function addScores(scores, osu_user_id) {
 
   console.log(`User had scores saved: ${hadScores}`);
   if (hadScores) {
-    console.log(`Last score saved for the user is: ${lastScore}`);
+    console.log(
+      "Last score saved for this user is:",
+      lastScore.score.beatmapset.title,
+    );
+    console.log("It was set at :", lastScore.created_at);
+    console.log("The session id for this score is:", lastScore.session_id);
   }
 
   let session_id = hadScores ? lastScore.session_id : 0;
@@ -35,40 +40,28 @@ export async function addScores(scores, osu_user_id) {
   let count = 0;
   let prevScore;
 
-  for (const i in scores) {
+  for (let i = scores.length - 1; i >= 0; i--) {
     const score = scores[i];
 
     const timeStampCurrent = new Date(score.created_at);
 
-    //We reached the end of new scores if the user had previos scores and the last
-    //know previos score's timestamp is equal to the score we want to add
-    //this assumes the recent plays end point returns scores in accending order of time
-    const finished = (timeStampCurrent.getTime() ===
-      new Date(lastScore.created_at).getTime()) &&
-      hadScores;
-    if (finished) {
-      console.log(`reached end of new scores. ${count} added`);
-      break;
+    //if current score time <= last score time, skip
+    const skip =
+      timeStampCurrent.getTime() <= new Date(lastScore.created_at).getTime();
+    if (skip) {
+      console.log(
+        `score was set before latest score in database, it's being skipped`,
+      );
+      continue;
     }
-    //if there were no scores logged for this user then we would just log all the scores returned from the recent
-    //plays end point i.e. there is no break condition
 
     let timeStamPrev: Date;
 
     if (prevScore) {
-      console.log(
-        "prevScore is not null so we're using the diffrence between the last added score and the current score",
-      );
       timeStamPrev = new Date(prevScore.created_at);
     } else if (hadScores) {
-      console.log(
-        "prevScore was null, so we're on the first itteration of the loop, the user had scores so we're setting the previous score's time to the time of the last score in the database.",
-      );
       timeStamPrev = new Date(lastScore.created_at);
     } else {
-      console.log(
-        "the user had no scores and this is the first itteration of the loop. this means that the time diffrence should effectivly be 0 since we're just comparing the diffrence between the the same time stamps.",
-      );
       timeStamPrev = timeStampCurrent;
     }
 
@@ -77,7 +70,10 @@ export async function addScores(scores, osu_user_id) {
 
     // for a time diffrence more than 1 hour the session ID is incremented
     if (timeDiff > 60) {
-      console.log(`Starting new session... time diffrence is ${timeDiff}`);
+      console.log(
+        `Starting new session, last session was ${session_id}, new session is ${session_id + 1
+        }, time diffrence is ${timeDiff}`,
+      );
       session_id += 1;
     }
 

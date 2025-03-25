@@ -67,12 +67,10 @@ function setStartEndText(start, end) {
     second: "2-digit",
     hour12: false,
   });
-  document.getElementById("session-start").innerText = `Starts at: ${
-    formatter.format(new Date(start))
-  }`;
-  document.getElementById("session-end").innerText = `Ends at: ${
-    formatter.format(new Date(end))
-  }`;
+  document.getElementById("session-start").innerText = `Starts at: ${formatter.format(new Date(start))
+    }`;
+  document.getElementById("session-end").innerText = `Ends at: ${formatter.format(new Date(end))
+    }`;
 }
 
 async function getStartEnd(sessionID) {
@@ -147,6 +145,7 @@ track.addEventListener("click", async () => {
   populateProfileComponent(osu_user_info.otherData);
 
   const latestSessionID = await getLatestSession(osu_user_id);
+  console.log(latestSessionID);
 
   pager = addPager(latestSessionID);
 
@@ -358,9 +357,8 @@ function populateScores(sessionScores) {
     }
     tableRow.appendChild(pp);
 
-    set.innerHTML = `<span class="hide">${score.created_at}</span>${
-      formatRelativeTime(score.created_at)
-    }`;
+    set.innerHTML = `<span class="hide">${score.created_at}</span>${formatRelativeTime(score.created_at)
+      }`;
     tableRow.appendChild(set);
 
     rows.push(tableRow);
