@@ -12,6 +12,9 @@ import xh_rank from "../assets/xh-rank.svg";
 import star from "../assets/star.svg";
 import DataTable from "datatables.net-dt";
 import { Pagination } from "./component/pagination.js";
+import { Chart } from "chart.js/auto";
+import "chartjs-adapter-date-fns";
+import { format, parse } from "date-fns";
 
 const track = document.getElementById("track");
 const message = document.getElementById("message");
@@ -21,11 +24,14 @@ const statAcc = document.getElementById("acc");
 const statBpm = document.getElementById("bpm");
 const statMissCount = document.getElementById("misscount");
 const statSr = document.getElementById("sr");
+const profile = document.getElementById("pro-container");
 
 const table = new DataTable("#myTable", {
   paging: false,
   scrollY: 400,
 });
+let chart;
+
 const srTitle = document.querySelector("#icon-header span.dt-column-title");
 srTitle.innerHTML = `<img src=${star}/>`;
 
@@ -47,9 +53,9 @@ async function changeSession(sessionID) {
   changeTableInfo(
     `Passes: ${session.passes}   Fails: ${session.fails}`,
   );
-  const { start, end } = await getStartEnd(sessionID);
-  setStartEndText(start, end);
+  setStartEndText(session.startTime, session.endTime);
   populateStats(session);
+  await addGraph(session);
 }
 
 function changeTableInfo(text) {
@@ -67,10 +73,12 @@ function setStartEndText(start, end) {
     second: "2-digit",
     hour12: false,
   });
-  document.getElementById("session-start").innerText = `Starts at: ${formatter.format(new Date(start))
-    }`;
-  document.getElementById("session-end").innerText = `Ends at: ${formatter.format(new Date(end))
-    }`;
+  document.getElementById("session-start").innerText = `Starts at: ${
+    formatter.format(new Date(start))
+  }`;
+  document.getElementById("session-end").innerText = `Ends at: ${
+    formatter.format(new Date(end))
+  }`;
 }
 
 async function getStartEnd(sessionID) {
@@ -88,8 +96,8 @@ async function getStartEnd(sessionID) {
   }
 
   return {
-    start: startEnd[0].start_time,
-    end: startEnd[0].end_time,
+    start: new Date(startEnd[0].start_time),
+    end: new Date(startEnd[0].end_time),
   };
 
   //chaning start and end text
@@ -114,6 +122,10 @@ function checkOverlap() {
 }
 
 track.addEventListener("click", async () => {
+  if (!profile.classList.contains("hide")) {
+    profile.classList.add("hide");
+  }
+
   toggleLoading(track, loader);
 
   if (pager) {
@@ -143,6 +155,7 @@ track.addEventListener("click", async () => {
 
   osu_user_id = osu_user_info.id;
   populateProfileComponent(osu_user_info.otherData);
+  document.getElementById("pro-container").classList.toggle("hide");
 
   const latestSessionID = await getLatestSession(osu_user_id);
   console.log(latestSessionID);
@@ -210,17 +223,12 @@ function populateStats(sessionScores) {
 }
 
 async function getSessionScoresFromDB(session_id) {
-  //TODO: Some sessions still seem messed up. Session 19 on my profile for example has scores in it
-  //from 4 days agao and also scores form yesterday
-  //this implies that my session grouping still isn't working correctly
+  const { data: scores, error } = await supabase.rpc(
+    "get_session_scores_by_date",
+    { p_osu_user_id: osu_user_id, p_session_id: session_id },
+  );
 
-  const { data: scores, error: selectError } = await supabase
-    .from("osu_scores")
-    .select("*")
-    .eq("osu_user_id", osu_user_id)
-    .eq("session_id", session_id);
-
-  if (selectError) {
+  if (error) {
     console.error(
       `Error retrieving scores from database: ${selectError.message}`,
     );
@@ -233,8 +241,15 @@ async function getSessionScoresFromDB(session_id) {
     return null;
   }
 
-  const session = { scores: [], fails: 0, passes: 0 };
+  const session = {
+    scores: [],
+    fails: 0,
+    passes: 0,
+    startTime: undefined,
+    endTime: undefined,
+  };
 
+  //Count Fails and passes
   for (const score of scores) {
     session.scores.push(score);
     if (score.score.rank === "F") {
@@ -243,6 +258,12 @@ async function getSessionScoresFromDB(session_id) {
       session.passes++;
     }
   }
+
+  //Get start and end time of session
+  const startEnd = await getStartEnd(session_id);
+  session.startTime = startEnd.start;
+  session.endTime = startEnd.end;
+
   console.log(session);
   return session;
 }
@@ -357,8 +378,9 @@ function populateScores(sessionScores) {
     }
     tableRow.appendChild(pp);
 
-    set.innerHTML = `<span class="hide">${score.created_at}</span>${formatRelativeTime(score.created_at)
-      }`;
+    set.innerHTML = `<span class="hide">${score.created_at}</span>${
+      formatRelativeTime(score.created_at)
+    }`;
     tableRow.appendChild(set);
 
     rows.push(tableRow);
@@ -526,4 +548,61 @@ function calcAvg(type, sessionScores) {
     sum += score.score[type];
   }
   return { avg: sum / passes, passes: passes };
+}
+
+function createSessionSRData(session) {
+  const data = [];
+
+  const sessionLength = Math.abs(
+    session.startTime.getTime() - session.endTime.getTime(),
+  );
+  const timeInterval = sessionLength / session.scores.length;
+  let graphTime = session.startTime.getTime();
+
+  for (const score of session.scores) {
+    console.log(session.startTime.getTime());
+    graphTime += timeInterval;
+    data.push(
+      {
+        x: graphTime,
+        y: score.score.beatmap.difficulty_rating,
+      },
+    );
+  }
+  return data;
+}
+
+async function addGraph(session) {
+  if (chart) {
+    chart.destroy();
+  }
+
+  const data = createSessionSRData(session);
+  console.log(data);
+
+  let ctx = document.getElementById("test-graph");
+
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: "Star Rating Over Time",
+          data: data,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      parsing: false,
+      scales: {
+        x: {
+          type: "time",
+          time: {
+            tooltipFormat: "yyyy-MM-dd HH:mm",
+          },
+        },
+      },
+    },
+  });
 }
