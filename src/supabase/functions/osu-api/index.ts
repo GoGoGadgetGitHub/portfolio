@@ -43,7 +43,7 @@ Deno.serve(async (req: Request) => {
 
   console.log("Fetching recent plays.");
   const plays = await recentPlays(response.osu_user_info.id, token);
-  if (response.plays === null) {
+  if (plays === null) {
     response.error = "plays-fail";
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders },

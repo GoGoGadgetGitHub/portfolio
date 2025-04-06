@@ -223,6 +223,12 @@ div.stats stat {
   margin-right: 3rem;
 }
 
+div.stats img {
+  display: inline-block;
+  margin-right: 3rem;
+  filter: invert(6%) sepia(1%) saturate(5941%) hue-rotate(202deg) brightness(90%) contrast(101%);
+}
+
 .pager h4 {
   display: block;
   height: max-content;
@@ -327,6 +333,7 @@ div.stats stat {
 }
 
 .graph {
-  width: 100%;
   height: 500px;
+  width: 90%;
+  margin: auto;
 }

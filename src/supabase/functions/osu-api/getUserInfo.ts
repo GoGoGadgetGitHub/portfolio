@@ -1,4 +1,5 @@
 import { getClient } from "../_shared/supabase.ts";
+import { osuApiRequest } from "./apiCallTemplate.ts";
 
 export async function getUserInfo(osuUsername: string, token: string) {
   const supabase = getClient();
@@ -27,6 +28,7 @@ export async function getUserInfo(osuUsername: string, token: string) {
   console.log("Fetching user data...");
   const userData = await getUserData(osuUsername, token);
   if (userData === null) {
+    //this does not need to log any errors, that is handled in the apiCallTemplate
     return null;
   }
 
@@ -38,7 +40,6 @@ export async function getUserInfo(osuUsername: string, token: string) {
   return { id: userData.id, otherData: userData };
 }
 
-//adds an osu profile to the profiles table
 async function addOsuUser(userData, supabase) {
   const { data, error: insertError } = await supabase
     .from("osu_profiles")
@@ -59,18 +60,11 @@ async function addOsuUser(userData, supabase) {
 }
 
 export async function getUserData(osuUsername: string, token: string) {
-  const urlApi = new URL(
-    `https://osu.ppy.sh/api/v2/users/@${osuUsername}/`,
-  );
+  const url = `https://osu.ppy.sh/api/v2/users/@${osuUsername}/`;
 
   const params = {
     "key": osuUsername,
   };
-
-  Object.keys(params).forEach((key) =>
-    urlApi.searchParams.append(key, params[key])
-  );
-  console.log(urlApi);
 
   const headers = {
     "Content-Type": "application/json",
@@ -78,24 +72,15 @@ export async function getUserData(osuUsername: string, token: string) {
     "Authorization": `Bearer ${token}`,
   };
 
-  let response: Response;
-  try {
-    response = await fetch(urlApi, {
-      method: "GET",
+  const method = "GET";
+
+  return osuApiRequest(
+    {
+      url,
       headers,
-    });
-
-    if (!response.ok) {
-      console.error(
-        `HTTP error: ${response.status} - ${response.statusText}`,
-      );
-      return null;
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log("Error fetching user id:", error);
-    return null;
-  }
+      errorString: "Error fetching userdata!",
+      method,
+      params,
+    },
+  );
 }

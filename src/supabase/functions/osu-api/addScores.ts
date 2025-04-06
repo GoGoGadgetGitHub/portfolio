@@ -77,6 +77,12 @@ export async function addScores(scores, osu_user_id) {
       session_id += 1;
     }
 
+    //get sr for score with mods if score has mods
+    //check database for scores first
+
+    //make an api call if a score is modded and it's not found on
+    //the server
+
     //add record
     const created_at = score.created_at;
     const { error: insertError } = await supabase

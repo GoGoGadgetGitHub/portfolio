@@ -4,16 +4,16 @@ main {
   position: relative;
 }
 
-.hide{
+.hide {
   display: none;
 }
 
-.selected{
+.selected {
   background-color: var(--foreground);
   color: var(--background);
 }
 
-.selected .arrow{
+.selected .arrow {
   filter: invert(87%) sepia(0%) saturate(2519%) hue-rotate(315deg) brightness(98%) contrast(75%);
 }
 
@@ -51,45 +51,49 @@ main {
   justify-content: space-between;
 }
 
-#dropdown-content #moon-div label{
+#dropdown-content #moon-div label {
   display: block;
   margin: auto;
   width: max-content;
 }
 
-.controls .dropdown{
+.controls .dropdown {
   display: flex;
   padding: .3em;
   margin: auto;
   width: 10rem;
 }
-#stop-viewing{
+
+#stop-viewing {
   border: 2px solid var(--foreground);
   border-radius: 15px;
   background-color: var(--foreground);
   color: var(--background);
-  margin:auto;
+  margin: auto;
   font-size: 1rem;
   padding: 2px 1%;
 }
-#stop-viewing:hover{
+
+#stop-viewing:hover {
   background-color: var(--color3);
   color: var(--foreground);
   border-color: var(--color3);
 }
-.arrow{
+
+.arrow {
   margin: auto 0 auto auto;
-  cursor: pointer; 
+  cursor: pointer;
   width: 1.2rem;
   transition: transform 0.4s ease-in-out;
   filter: invert(6%) sepia(1%) saturate(5941%) hue-rotate(202deg) brightness(90%) contrast(101%);
 }
 
-.dropdown p{
+.dropdown p {
   height: 100%;
   text-align: center;
   margin: 0;
 }
+
 .dropdown label:hover {
   color: var(--color3);
 }

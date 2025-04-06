@@ -111,7 +111,7 @@ export class Pagination {
   }
 
   pageNumbers(rightEnd) {
-    if (rightEnd <= 5) {
+    if (rightEnd <= 4) {
       for (let i = 0; i <= rightEnd; i++) {
         this.pages[i].value = i;
       }
@@ -181,7 +181,7 @@ export class Pagination {
 
   //moves page up or down depending on direction passed
   move(forwards) {
-    const pointerMax = (this.maxPages <= 5) ? this.maxPages : 4;
+    const pointerMax = (this.maxPages <= 4) ? this.maxPages : 4;
     const rightEnd = this.pages[4].value === this.maxPages;
     const leftEnd = this.pages[0].value === 0;
 
@@ -190,7 +190,7 @@ export class Pagination {
         return;
       }
 
-      if (this.maxPages <= 5) {
+      if (this.maxPages <= 4) {
         this.pointer++;
         return;
       }
@@ -211,7 +211,7 @@ export class Pagination {
         return;
       }
 
-      if (this.maxPages <= 5) {
+      if (this.maxPages <= 4) {
         this.pointer--;
         return;
       }

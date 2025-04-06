@@ -16,6 +16,12 @@ import { Chart } from "chart.js/auto";
 import "chartjs-adapter-date-fns";
 import { format, parse } from "date-fns";
 
+//TODO: figure out graph switching logic
+
+//NOTE: There are some genreal things abou the UI which i feel can use improvment. Most notably the songs table's font and
+//font size
+//Generally i think the font looks really plain and the weight probably needs to be a little higher
+
 const track = document.getElementById("track");
 const message = document.getElementById("message");
 const loader = document.getElementById("loader");
@@ -41,6 +47,12 @@ let osu_user_id = undefined;
 startEndComponent();
 
 const failRadio = document.getElementById("fail-radio");
+
+//TODO: somthing broke while i was changing sessions
+//that is not helpfull...
+
+//TODO: OPTIMIZE SHIT
+//niether is this
 
 async function changeSession(sessionID) {
   const session = await getSessionScoresFromDB(sessionID);
@@ -107,6 +119,7 @@ failRadio.addEventListener("change", () => {
   toggleFails();
 });
 
+//TODO: fix graph resizing
 window.addEventListener("resize", checkOverlap);
 
 function checkOverlap() {
@@ -167,6 +180,7 @@ track.addEventListener("click", async () => {
   toggleLoading(track, loader);
 });
 
+// TODO: Profile picture links to osu profile
 function populateProfileComponent(osuUserData) {
   console.log(osuUserData);
   const image = document.getElementById("pro-img");
@@ -207,6 +221,10 @@ async function getLatestSession() {
 
   return sessionID;
 }
+
+//TODO: Figure out how to do modded sr for both the graph and the displayed star rating
+//this requires an api call for each new modded score, that ups the amount of calls i need to do
+//to update the scores for a user. (I'll do an initial implimentation just to get the sr to be more accurate)
 
 function populateStats(sessionScores) {
   const passes = sessionScores.passes;
@@ -268,6 +286,8 @@ async function getSessionScoresFromDB(session_id) {
   return session;
 }
 
+//TODO: Song links should open up in a new tab
+//TODO: add mods to table
 function populateScores(sessionScores) {
   const rows = [];
   table.clear().draw();
@@ -550,21 +570,16 @@ function calcAvg(type, sessionScores) {
   return { avg: sum / passes, passes: passes };
 }
 
+//TODO: add other chart data functions, maybe make a module that you can import and pass data to
+//TODO: figure out chart colors (see graph idea draw io file)
 function createSessionSRData(session) {
   const data = [];
 
-  const sessionLength = Math.abs(
-    session.startTime.getTime() - session.endTime.getTime(),
-  );
-  const timeInterval = sessionLength / session.scores.length;
-  let graphTime = session.startTime.getTime();
-
   for (const score of session.scores) {
     console.log(session.startTime.getTime());
-    graphTime += timeInterval;
     data.push(
       {
-        x: graphTime,
+        x: new Date(score.created_at).getTime(),
         y: score.score.beatmap.difficulty_rating,
       },
     );
@@ -582,6 +597,7 @@ async function addGraph(session) {
 
   let ctx = document.getElementById("test-graph");
 
+  //TODO: add lablels for data
   chart = new Chart(ctx, {
     type: "line",
     data: {

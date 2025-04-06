@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { getClient } from "../_shared/supabase.ts";
+import { osuApiRequest } from "./apiCallTemplate.ts";
 
 export async function getToken() {
   const supabase = getClient();
@@ -29,7 +30,7 @@ export async function getToken() {
     const now = Date.now();
 
     //Token is still valid, return it
-    if (now < expiresAt) {
+    if (now > expiresAt) {
       console.log("Token is valid");
       return access_token;
     }
@@ -44,7 +45,7 @@ export async function getToken() {
   }
 
   //Upsert the new token
-  console.log("Updating token.");
+  console.log("Updating token");
   const { error: upsertError } = await supabase
     .from("token_cache")
     .upsert({
@@ -62,7 +63,26 @@ export async function getToken() {
 }
 
 async function fetchToken() {
+  const url = "http://osu.ppy.sh/oauth/token";
+
+  const headers = {
+    "Accept": "application/json",
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+
+  const method = "POST";
+
+  const body = new URLSearchParams({
+    client_id: Deno.env.get("OSU_CLIENT_ID"),
+    client_secret: Deno.env.get("OSU_CLIENT_SECRET"),
+    grant_type: "client_credentials",
+    scope: "public",
+  });
+
+  return osuApiRequest(url, headers, "Token Fetch Failed.", method, body);
+
   //Fetching new token
+  /*
   let tokenResponse: Response;
   try {
     tokenResponse = await fetch("http://osu.ppy.sh/oauth/token", {
@@ -96,4 +116,5 @@ async function fetchToken() {
     console.error("Error fetching API token:", error);
     return null;
   }
+  */
 }
