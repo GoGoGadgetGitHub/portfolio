@@ -1,13 +1,11 @@
-import { corsHeaders } from "../_shared/cors.ts";
-
 export async function osuApiRequest(
   { url, headers, errorString, method, body, params }: {
     url: string;
-    headers: object;
+    headers: Record<string, string>;
     errorString: string;
     method: string;
-    body?: object;
-    params?: object;
+    body?: BodyInit;
+    params?: Record<string, string>;
   },
 ) {
   const urlApi = new URL(url);
@@ -27,13 +25,9 @@ export async function osuApiRequest(
     });
 
     if (!response.ok) {
-      console.error(
-        `HTTP error: ${response.status} - ${response.statusText}`,
-      );
-      return new Response(`${errorString} - response was not ok!`, {
-        headers: { ...corsHeaders },
-        status: response.status,
-      });
+      console.error(`HTTP error: ${response.status} - ${response.statusText}`);
+      console.error(`${errorString} - response was not ok!`);
+      return null;
     }
 
     const data = await response.json();

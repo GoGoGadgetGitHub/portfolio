@@ -1,6 +1,7 @@
 import { getClient } from "../_shared/supabase.ts";
+import { getSrWithMods } from "./getSrWithMods.ts";
 
-export async function addScores(scores, osu_user_id) {
+export async function addScores(scores, osu_user_id, token) {
   const supabase = getClient();
   if (supabase === null) {
     console.error("Could not create supabase client");
@@ -23,7 +24,6 @@ export async function addScores(scores, osu_user_id) {
   // if the latest score stored procedure returns null for the user id,
   // this means that there are no scores saved for that user and we need to start with a session ID of 0
   const hadScores = lastScore.osu_user_id !== null;
-
   console.log(`User had scores saved: ${hadScores}`);
   if (hadScores) {
     console.log(
@@ -71,20 +71,47 @@ export async function addScores(scores, osu_user_id) {
     // for a time diffrence more than 1 hour the session ID is incremented
     if (timeDiff > 60) {
       console.log(
-        `Starting new session, last session was ${session_id}, new session is ${session_id + 1
+        `Starting new session, last session was ${session_id}, new session is ${
+          session_id + 1
         }, time diffrence is ${timeDiff}`,
       );
       session_id += 1;
     }
 
-    //get sr for score with mods if score has mods
-    //check database for scores first
+    //TODO: Figure out some caching for this
+    //
+    //NOTE:
+    //So this has to check if the mods list only contains CL and NF or just CL or just NF, if so then we don't need to
+    //recalculate the star rating
+    //Other then that some players migh play like DT only for the entire session, resulting in loads of
+    //API calls to add their scores, making this take very very long.
+    //i could try a query for this map with these mods in my db to check if i maybe have the sr stored already
 
-    //make an api call if a score is modded and it's not found on
-    //the server
+    //Ignore the score for sr fetch if it only has either NF or CL or both.
+    let nf = false;
+    let cl = false;
+    for (const mod of score.mods) {
+      nf = mod === "NF";
+      cl = mod === "CL";
+    }
+
+    const shouldGetNewSR = !((nf && cl && score.mods.length === 2) ||
+      ((nf || cl) && score.mods.length === 1) ||
+      (score.mods.length === 0));
+
+    if (shouldGetNewSR) {
+      console.log("This score has mods that effect SR: ", score.mods);
+      const srWithMods = await getSrWithMods(
+        score.beatmap.id,
+        score.mods,
+        token,
+      );
+      console.log(srWithMods.star_rating);
+      //just change the sr of the score response lol
+    }
 
     //add record
-    const created_at = score.created_at;
+    const created_at = score.ended_at;
     const { error: insertError } = await supabase
       .from("osu_scores")
       .insert({ osu_user_id, created_at, score, session_id });

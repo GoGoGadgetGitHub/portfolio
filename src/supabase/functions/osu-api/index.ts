@@ -17,48 +17,44 @@ Deno.serve(async (req: Request) => {
   const { osuUsername } = await req.json();
   console.log(`The username passed is: ${osuUsername}`);
 
-  const response = { osu_user_info: null, error: null };
+  const response: { osu_user_info?: object; error?: string } = {
+    osu_user_info: undefined,
+    error: undefined,
+  };
+
+  const failOpts = {
+    headers: { ...corsHeaders },
+    status: 500,
+  };
 
   //TODO: The token caching does not work properly i need to fix it
   console.log(`Getting token`);
   const token = await getToken();
   if (token === null) {
     response.error = "token-fail";
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders },
-      status: 500,
-    });
+    return new Response(JSON.stringify(response), failOpts);
   }
 
   console.log("Getting osu user data.");
   response.osu_user_info = await getUserInfo(osuUsername, token);
   console.log(response.osu_user_info);
-  if (response.osu_user_info === null) {
+  if (!response.osu_user_info) {
     response.error = "info-fail";
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders },
-      status: 500,
-    });
+    return new Response(JSON.stringify(response), failOpts);
   }
 
   console.log("Fetching recent plays.");
   const plays = await recentPlays(response.osu_user_info.id, token);
-  if (plays === null) {
+  if (!plays) {
     response.error = "plays-fail";
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders },
-      status: 500,
-    });
+    return new Response(JSON.stringify(response), failOpts);
   }
 
   console.log("Adding scores to database.");
-  const added = await addScores(plays, response.osu_user_info.id);
+  const added = await addScores(plays, response.osu_user_info.id, token);
   if (!added) {
     response.error = "add-scores-fail";
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders },
-      status: 500,
-    });
+    return new Response(JSON.stringify(response), failOpts);
   }
 
   return new Response(

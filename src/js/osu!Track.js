@@ -54,67 +54,6 @@ const failRadio = document.getElementById("fail-radio");
 //TODO: OPTIMIZE SHIT
 //niether is this
 
-async function changeSession(sessionID) {
-  const session = await getSessionScoresFromDB(sessionID);
-
-  if (session === null) {
-    return null;
-  }
-
-  populateScores(session.scores);
-  changeTableInfo(
-    `Passes: ${session.passes}   Fails: ${session.fails}`,
-  );
-  setStartEndText(session.startTime, session.endTime);
-  populateStats(session);
-  await addGraph(session);
-}
-
-function changeTableInfo(text) {
-  const targetDiv = document.getElementById("myTable_info");
-  targetDiv.innerText = text;
-}
-
-function setStartEndText(start, end) {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
-  document.getElementById("session-start").innerText = `Starts at: ${
-    formatter.format(new Date(start))
-  }`;
-  document.getElementById("session-end").innerText = `Ends at: ${
-    formatter.format(new Date(end))
-  }`;
-}
-
-async function getStartEnd(sessionID) {
-  //calling stored procedure
-  const { data: startEnd, error } = await supabase.rpc(
-    "get_start_and_end_of_session",
-    { p_osu_user_id: osu_user_id, p_session_id: sessionID },
-  );
-
-  if (error) {
-    console.error(
-      `could net retrieve start and end of session for session ${sessionID}`,
-    );
-    return null;
-  }
-
-  return {
-    start: new Date(startEnd[0].start_time),
-    end: new Date(startEnd[0].end_time),
-  };
-
-  //chaning start and end text
-}
-
 failRadio.addEventListener("change", () => {
   toggleFails();
 });
@@ -179,6 +118,65 @@ track.addEventListener("click", async () => {
 
   toggleLoading(track, loader);
 });
+
+async function changeSession(sessionID) {
+  const session = await getSessionScoresFromDB(sessionID);
+
+  if (session === null) {
+    return null;
+  }
+
+  populateScores(session.scores);
+  changeTableInfo(
+    `Passes: ${session.passes}   Fails: ${session.fails}`,
+  );
+  setStartEndText(session.startTime, session.endTime);
+  populateStats(session);
+  await addGraph(session);
+}
+
+function changeTableInfo(text) {
+  const targetDiv = document.getElementById("myTable_info");
+  targetDiv.innerText = text;
+}
+
+function setStartEndText(start, end) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  document.getElementById("session-start").innerText = `Starts at: ${formatter.format(new Date(start))
+    }`;
+  document.getElementById("session-end").innerText = `Ends at: ${formatter.format(new Date(end))
+    }`;
+}
+
+async function getStartEnd(sessionID) {
+  //calling stored procedure
+  const { data: startEnd, error } = await supabase.rpc(
+    "get_start_and_end_of_session",
+    { p_osu_user_id: osu_user_id, p_session_id: sessionID },
+  );
+
+  if (error) {
+    console.error(
+      `could net retrieve start and end of session for session ${sessionID}`,
+    );
+    return null;
+  }
+
+  return {
+    start: new Date(startEnd[0].start_time),
+    end: new Date(startEnd[0].end_time),
+  };
+
+  //chaning start and end text
+}
 
 // TODO: Profile picture links to osu profile
 function populateProfileComponent(osuUserData) {
@@ -398,9 +396,8 @@ function populateScores(sessionScores) {
     }
     tableRow.appendChild(pp);
 
-    set.innerHTML = `<span class="hide">${score.created_at}</span>${
-      formatRelativeTime(score.created_at)
-    }`;
+    set.innerHTML = `<span class="hide">${score.created_at}</span>${formatRelativeTime(score.created_at)
+      }`;
     tableRow.appendChild(set);
 
     rows.push(tableRow);
@@ -587,7 +584,7 @@ function createSessionSRData(session) {
   return data;
 }
 
-async function addGraph(session) {
+function addGraph(session) {
   if (chart) {
     chart.destroy();
   }
@@ -595,7 +592,7 @@ async function addGraph(session) {
   const data = createSessionSRData(session);
   console.log(data);
 
-  let ctx = document.getElementById("test-graph");
+  const ctx = document.getElementById("test-graph");
 
   //TODO: add lablels for data
   chart = new Chart(ctx, {

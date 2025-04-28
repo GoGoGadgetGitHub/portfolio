@@ -9,6 +9,7 @@ export async function recentPlays(osu_user_id: string, token: string) {
   };
 
   const headers = {
+    "x-api-version": "20220705",
     "Content-Type": "application/json",
     "Accept": "application/json",
     "Authorization": `Bearer ${token}`,

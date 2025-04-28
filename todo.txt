@@ -1,7 +1,0 @@
-//get a simple edge function working to get the hang of it
-
-have that edge fucnction use the osu api the fetch the recent plays of a spesified user
-
-I need to find the right end point, odd are it's api/v2/scores. but this seems like it needs authentication from a spesicfic user to make it do what i want it to
-
-then make a wrapper js file that wraps the edge function call to make using it simpler(in progress)

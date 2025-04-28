@@ -30,7 +30,7 @@ export async function getToken() {
     const now = Date.now();
 
     //Token is still valid, return it
-    if (now > expiresAt) {
+    if (now < expiresAt) {
       console.log("Token is valid");
       return access_token;
     }
@@ -79,7 +79,13 @@ async function fetchToken() {
     scope: "public",
   });
 
-  return osuApiRequest(url, headers, "Token Fetch Failed.", method, body);
+  return osuApiRequest({
+    url,
+    headers,
+    errorString: "Token Fetch Failed.",
+    method,
+    body: body,
+  });
 
   //Fetching new token
   /*
